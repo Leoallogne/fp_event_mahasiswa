@@ -2,15 +2,18 @@
 
 require_once __DIR__ . '/../config/database.php';
 
-class AnalyticsService {
+class AnalyticsService
+{
     private $db;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $database = new Database();
         $this->db = $database->getConnection();
     }
-    
-    public function hitungKategoriEventTerbanyakPeminat() {
+
+    public function hitungKategoriEventTerbanyakPeminat()
+    {
         try {
             $stmt = $this->db->prepare("SELECT e.kategori, 
                                       COUNT(r.id) as total_peserta,
@@ -21,13 +24,14 @@ class AnalyticsService {
                                       ORDER BY total_peserta DESC");
             $stmt->execute();
             return $stmt->fetchAll();
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Analytics Error: " . $e->getMessage());
             return [];
         }
     }
-    
-    public function hitungRataRataPesertaPerEvent() {
+
+    public function hitungRataRataPesertaPerEvent()
+    {
         try {
             $stmt = $this->db->prepare("SELECT 
                                       COUNT(DISTINCT e.id) as total_event,
@@ -37,13 +41,14 @@ class AnalyticsService {
                                       LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'confirmed'");
             $stmt->execute();
             return $stmt->fetch();
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Analytics Error: " . $e->getMessage());
             return null;
         }
     }
-    
-    public function trenJumlahEventBulanan($limit = 12) {
+
+    public function trenJumlahEventBulanan($limit = 12)
+    {
         try {
             $stmt = $this->db->prepare("SELECT 
                                         DATE_FORMAT(tanggal, '%Y-%m') as bulan,
@@ -56,19 +61,20 @@ class AnalyticsService {
                                         ORDER BY bulan ASC");
             $stmt->execute([$limit]);
             return $stmt->fetchAll();
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Analytics Error: " . $e->getMessage());
             return [];
         }
     }
-    
-    public function rekomendasiEvent($userId = null, $limit = 5) {
+
+    public function rekomendasiEvent($userId = null, $limit = 5)
+    {
         try {
             // Recommend events based on:
             // 1. Upcoming events
             // 2. Events with available quota
             // 3. Events in categories user hasn't registered yet (if userId provided)
-            
+
             $sql = "SELECT e.*, 
                     COUNT(r.id) as registered_count,
                     (e.kuota - COUNT(r.id)) as available_quota
@@ -76,7 +82,7 @@ class AnalyticsService {
                     LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'confirmed'
                     WHERE e.tanggal >= NOW()
                     AND e.kuota > COUNT(r.id)";
-            
+
             if ($userId) {
                 // Exclude events user already registered
                 $sql .= " AND e.id NOT IN (
@@ -84,12 +90,12 @@ class AnalyticsService {
                             WHERE user_id = ? AND status = 'confirmed'
                          )";
             }
-            
+
             $sql .= " GROUP BY e.id
                       HAVING available_quota > 0
                       ORDER BY e.tanggal ASC
                       LIMIT ?";
-            
+
             if ($userId) {
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([$userId, $limit]);
@@ -97,57 +103,70 @@ class AnalyticsService {
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([$limit]);
             }
-            
+
             return $stmt->fetchAll();
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Analytics Error: " . $e->getMessage());
             return [];
         }
     }
-    
-    public function getEventStats() {
+
+    public function getEventStats()
+    {
         try {
             $stats = [];
-            
+
             // Total events
             $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM events");
             $stmt->execute();
             $stats['total_events'] = $stmt->fetch()['total'];
-            
+
             // Total registrations
             $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM registrations WHERE status = 'confirmed'");
             $stmt->execute();
             $stats['total_registrations'] = $stmt->fetch()['total'];
-            
+
             // Total users
             $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM users WHERE role = 'user'");
             $stmt->execute();
             $stats['total_users'] = $stmt->fetch()['total'];
-            
+
             // Upcoming events
             $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM events WHERE tanggal >= NOW()");
             $stmt->execute();
             $stats['upcoming_events'] = $stmt->fetch()['total'];
-            
+
+            // Total Revenue (Paid Events)
+            // Revenue = Sum of (event price * confirmed participants)
+            $stmt = $this->db->prepare("
+                SELECT SUM(e.price) as total_revenue
+                FROM events e
+                JOIN registrations r ON e.id = r.event_id 
+                WHERE e.is_paid = 1 AND r.status = 'confirmed'
+            ");
+            $stmt->execute();
+            $stats['total_revenue'] = $stmt->fetch()['total_revenue'] ?? 0;
+
             return $stats;
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Analytics Error: " . $e->getMessage());
             return [];
         }
     }
-    
-    public function exportToCSV($data, $filename = 'report.csv') {
+
+    public function exportToCSV($data, $filename = 'report.csv')
+    {
         // Set headers
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=' . $filename);
         header('Pragma: no-cache');
         header('Expires: 0');
-        
+
         $output = fopen('php://output', 'w');
-        
+
         // Add BOM for UTF-8 (Excel compatibility)
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
         if (empty($data)) {
             // If no data, write header only with message
             fputcsv($output, ['No Data Available']);
@@ -155,10 +174,10 @@ class AnalyticsService {
         } else {
             // Get headers from first row
             $headers = array_keys($data[0]);
-            
+
             // Write headers
             fputcsv($output, $headers);
-            
+
             // Write data rows
             foreach ($data as $row) {
                 // Ensure all values are properly formatted
@@ -166,17 +185,18 @@ class AnalyticsService {
                 foreach ($headers as $header) {
                     $value = $row[$header] ?? '';
                     // Convert to string and handle special characters
-                    $csvRow[] = is_numeric($value) ? $value : (string)$value;
+                    $csvRow[] = is_numeric($value) ? $value : (string) $value;
                 }
                 fputcsv($output, $csvRow);
             }
         }
-        
+
         fclose($output);
         exit;
     }
-    
-    public function exportEventsToCSV() {
+
+    public function exportEventsToCSV()
+    {
         try {
             $stmt = $this->db->prepare("SELECT 
                 e.id,
@@ -195,7 +215,7 @@ class AnalyticsService {
                 ORDER BY e.tanggal DESC");
             $stmt->execute();
             $rawData = $stmt->fetchAll();
-            
+
             // Format data dengan header yang jelas
             $data = [];
             foreach ($rawData as $row) {
@@ -205,21 +225,22 @@ class AnalyticsService {
                     'Kategori' => $row['kategori'],
                     'Tanggal' => $row['tanggal'],
                     'Lokasi' => $row['lokasi'],
-                    'Kuota' => (int)$row['kuota'],
-                    'Jumlah Peserta' => (int)$row['jumlah_peserta'],
+                    'Kuota' => (int) $row['kuota'],
+                    'Jumlah Peserta' => (int) $row['jumlah_peserta'],
                     'Dibuat Oleh' => $row['dibuat_oleh'] ?? '-',
                     'Tanggal Dibuat' => $row['created_at']
                 ];
             }
-            
+
             $this->exportToCSV($data, 'daftar_event_' . date('Y-m-d') . '.csv');
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Export Events Error: " . $e->getMessage());
             return false;
         }
     }
-    
-    public function exportRegistrationsToCSV() {
+
+    public function exportRegistrationsToCSV()
+    {
         try {
             $stmt = $this->db->prepare("SELECT 
                 r.id,
@@ -237,7 +258,7 @@ class AnalyticsService {
                 ORDER BY r.daftar_waktu DESC");
             $stmt->execute();
             $rawData = $stmt->fetchAll();
-            
+
             // Format data dengan header yang jelas
             $data = [];
             foreach ($rawData as $row) {
@@ -252,9 +273,9 @@ class AnalyticsService {
                     'Status' => $row['status']
                 ];
             }
-            
+
             $this->exportToCSV($data, 'daftar_peserta_' . date('Y-m-d') . '.csv');
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Export Registrations Error: " . $e->getMessage());
             return false;
         }

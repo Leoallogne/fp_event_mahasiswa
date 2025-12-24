@@ -137,38 +137,74 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Event Management System</title>
+    <title>Profile Saya - EventKu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --font-inter: 'Inter', sans-serif;
+        }
+
         body {
-            background-color: #f8f9fa;
+            background-color: #f3f4f6;
+            font-family: var(--font-inter);
+            color: #1f2937;
         }
 
-        .profile-card {
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        .main-content {
+            margin-left: 250px;
+            padding: 0;
+            min-height: 100vh;
         }
 
-        .profile-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Hero Profile Section */
+        .profile-hero {
+            background: var(--primary-gradient);
+            padding: 3rem 2rem 8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.4;
+        }
+
+        .profile-hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
             color: white;
-            padding: 2rem;
-            border-radius: 15px 15px 0 0;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 1.5rem;
         }
 
         .profile-avatar {
-            width: 100px;
-            height: 100px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            color: #667eea;
-            margin: 0 auto 1rem;
+            font-size: 3.5rem;
+            color: #4f46e5;
             overflow: hidden;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
         .profile-avatar img {
@@ -176,141 +212,500 @@ try {
             height: 100%;
             object-fit: cover;
         }
+
+        .hero-name {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-email {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-top: -5rem;
+            padding: 0 2rem 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.primary {
+            background: rgba(79, 70, 229, 0.1);
+            color: #4f46e5;
+        }
+
+        .stat-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .stat-icon.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        /* Content Section */
+        .content-section {
+            padding: 0 2rem 2rem;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* Tabs */
+        .nav-tabs-custom {
+            border-bottom: 2px solid #f3f4f6;
+            padding: 0 1.5rem;
+        }
+
+        .nav-tabs-custom .nav-link {
+            border: none;
+            color: #6b7280;
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .nav-tabs-custom .nav-link:hover {
+            color: #4f46e5;
+        }
+
+        .nav-tabs-custom .nav-link.active {
+            color: #4f46e5;
+            background: transparent;
+        }
+
+        .nav-tabs-custom .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #4f46e5;
+        }
+
+        .tab-content {
+            padding: 2rem 1.5rem;
+        }
+
+        /* Form Styling */
+        .form-label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Avatar Upload */
+        .avatar-upload-wrapper {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            overflow: hidden;
+            border: 3px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9fafb;
+            font-size: 3rem;
+            color: #d1d5db;
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn-upload input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-outline-secondary {
+            border: 1px solid #d1d5db;
+            color: #6b7280;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+
+            .profile-hero {
+                padding: 2rem 1rem 6rem;
+            }
+
+            .hero-name {
+                font-size: 1.5rem;
+            }
+
+            .stats-section {
+                padding: 0 1rem 1rem;
+                margin-top: -4rem;
+            }
+
+            .content-section {
+                padding: 0 1rem 1rem;
+            }
+
+            .nav-tabs-custom {
+                padding: 0 0.5rem;
+            }
+
+            .nav-tabs-custom .nav-link {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 
 <body>
     <?php include 'includes/sidebar.php'; ?>
-    <div class="main-content" style="margin-left: 250px; padding: 20px;">
-        <div class="container-fluid">
-            <h2 class="mb-4"><i class="bi bi-person-circle"></i> Profile Saya</h2>
 
+    <div class="main-content">
+        <!-- Hero Profile Section -->
+        <div class="profile-hero">
+            <div class="profile-hero-content">
+                <div class="avatar-wrapper">
+                    <div class="profile-avatar" id="heroAvatar">
+                        <?php
+                        $avatar = $currentUser['avatar'] ?? '';
+                        if (!empty($avatar) && file_exists(__DIR__ . '/uploads/avatars/' . $avatar)): ?>
+                            <img src="uploads/avatars/<?= htmlspecialchars($avatar) ?>" alt="Avatar">
+                        <?php else: ?>
+                            <i class="bi bi-person"></i>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <h1 class="hero-name"><?= htmlspecialchars($currentUser['nama']) ?></h1>
+                <p class="hero-email"><?= htmlspecialchars($currentUser['email']) ?></p>
+                <span class="hero-badge">
+                    <i class="bi bi-shield-check me-1"></i><?= ucfirst($currentUser['role']) ?>
+                </span>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <div class="stat-value"><?= $totalRegistrations ?></div>
+                        <div class="stat-label">Total Event Terdaftar</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="stat-value">
+                            <?php
+                            try {
+                                $stmt = $db->prepare("SELECT COUNT(*) as total FROM registrations r 
+                                    JOIN events e ON r.event_id = e.id 
+                                    WHERE r.user_id = ? AND e.tanggal > NOW()");
+                                $stmt->execute([$currentUser['id']]);
+                                echo $stmt->fetch()['total'] ?? 0;
+                            } catch (PDOException $e) {
+                                echo '0';
+                            }
+                            ?>
+                        </div>
+                        <div class="stat-label">Event Mendatang</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <div class="stat-value">
+                            <?php
+                            try {
+                                $stmt = $db->prepare("SELECT created_at FROM users WHERE id = ?");
+                                $stmt->execute([$currentUser['id']]);
+                                $userData = $stmt->fetch();
+                                $joinDate = new DateTime($userData['created_at'] ?? 'now');
+                                $now = new DateTime();
+                                $diff = $now->diff($joinDate);
+                                echo $diff->days;
+                            } catch (Exception $e) {
+                                echo '0';
+                            }
+                            ?>
+                        </div>
+                        <div class="stat-label">Hari Bergabung</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
             <?php if ($error): ?>
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($error) ?>
+                <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm border-0">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($error) ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
 
             <?php if ($success): ?>
-                <div class="alert alert-success alert-dismissible fade show">
-                    <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
+                <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm border-0">
+                    <i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($success) ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
 
-            <div class="row">
-                <!-- Profile Info Card -->
-                <div class="col-md-4 mb-4">
-                    <div class="card profile-card">
-                        <div class="profile-header text-center">
-                            <div class="profile-avatar">
-                                <?php
-                                $avatar = $currentUser['avatar'] ?? '';
-                                if (!empty($avatar) && file_exists(__DIR__ . '/uploads/avatars/' . $avatar)): ?>
-                                    <img src="uploads/avatars/<?= htmlspecialchars($avatar) ?>" alt="Avatar">
-                                <?php else: ?>
-                                    <i class="bi bi-person"></i>
-                                <?php endif; ?>
-                            </div>
-                            <h4><?= htmlspecialchars($currentUser['nama']) ?></h4>
-                            <p class="mb-0"><?= htmlspecialchars($currentUser['email']) ?></p>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center mb-3">
-                                <h5 class="text-primary"><?= $totalRegistrations ?></h5>
-                                <small class="text-muted">Event Terdaftar</small>
-                            </div>
-                            <hr>
-                            <div class="mb-2">
-                                <small class="text-muted">Role:</small>
-                                <span class="badge bg-primary"><?= ucfirst($currentUser['role']) ?></span>
-                            </div>
-                            <div>
-                                <small class="text-muted">Member sejak:</small>
-                                <br>
-                                <?php
-                                try {
-                                    $stmt = $db->prepare("SELECT created_at FROM users WHERE id = ?");
-                                    $stmt->execute([$currentUser['id']]);
-                                    $userData = $stmt->fetch();
-                                    echo date('d F Y', strtotime($userData['created_at'] ?? 'now'));
-                                } catch (PDOException $e) {
-                                    echo '-';
-                                }
-                                ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="content-card">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-tab"
+                            type="button">
+                            <i class="bi bi-person me-2"></i>Edit Profile
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#password-tab" type="button">
+                            <i class="bi bi-lock me-2"></i>Ubah Password
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#info-tab" type="button">
+                            <i class="bi bi-info-circle me-2"></i>Informasi Akun
+                        </button>
+                    </li>
+                </ul>
 
-                <!-- Edit Profile Form -->
-                <div class="col-md-8 mb-4">
-                    <div class="card profile-card">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Profile</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="" enctype="multipart/form-data">
-                                <input type="hidden" name="action" value="update_profile">
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Edit Profile Tab -->
+                    <div class="tab-pane fade show active" id="profile-tab">
+                        <form method="POST" action="" enctype="multipart/form-data">
+                            <input type="hidden" name="action" value="update_profile">
 
-                                <div class="mb-3 text-center">
-                                    <label for="avatar" class="form-label">Avatar</label>
-                                    <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
-                                    <small class="text-muted">Format: jpg, jpeg, png, gif</small>
+                            <div class="avatar-upload-wrapper">
+                                <div class="avatar-preview" id="avatarPreview">
+                                    <?php if (!empty($avatar) && file_exists(__DIR__ . '/uploads/avatars/' . $avatar)): ?>
+                                        <img src="uploads/avatars/<?= htmlspecialchars($avatar) ?>" alt="Avatar">
+                                    <?php else: ?>
+                                        <i class="bi bi-person"></i>
+                                    <?php endif; ?>
                                 </div>
+                                <label class="btn btn-outline-secondary btn-upload">
+                                    <i class="bi bi-camera me-2"></i>Pilih Foto
+                                    <input type="file" id="avatar" name="avatar" accept="image/*"
+                                        onchange="previewAvatar(event)">
+                                </label>
+                                <p class="text-muted small mt-2 mb-0">JPG, PNG, atau GIF (Max 2MB)</p>
+                            </div>
 
-                                <div class="mb-3">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label for="nama" class="form-label">Nama Lengkap</label>
                                     <input type="text" class="form-control" id="nama" name="nama"
                                         value="<?= htmlspecialchars($currentUser['nama']) ?>" required>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label for="email" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="email" name="email"
                                         value="<?= htmlspecialchars($currentUser['email']) ?>" required>
                                 </div>
+                            </div>
 
+                            <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save"></i> Simpan Perubahan
+                                    <i class="bi bi-save me-2"></i>Simpan Perubahan
                                 </button>
-                            </form>
-                        </div>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-2"></i>Batal
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
-                    <!-- Change Password Form -->
-                    <div class="card profile-card mt-4">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0"><i class="bi bi-lock"></i> Ubah Password</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="">
-                                <input type="hidden" name="action" value="change_password">
+                    <!-- Change Password Tab -->
+                    <div class="tab-pane fade" id="password-tab">
+                        <form method="POST" action="">
+                            <input type="hidden" name="action" value="change_password">
 
-                                <div class="mb-3">
-                                    <label for="current_password" class="form-label">Password Lama</label>
-                                    <input type="password" class="form-control" id="current_password"
-                                        name="current_password" required>
-                                </div>
+                            <div class="mb-3">
+                                <label for="current_password" class="form-label">Password Lama</label>
+                                <input type="password" class="form-control" id="current_password"
+                                    name="current_password" required>
+                            </div>
 
-                                <div class="mb-3">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label for="new_password" class="form-label">Password Baru</label>
                                     <input type="password" class="form-control" id="new_password" name="new_password"
                                         required minlength="6">
                                     <small class="text-muted">Minimal 6 karakter</small>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label for="confirm_password" class="form-label">Konfirmasi Password Baru</label>
                                     <input type="password" class="form-control" id="confirm_password"
                                         name="confirm_password" required minlength="6">
                                 </div>
+                            </div>
 
-                                <button type="submit" class="btn btn-warning">
-                                    <i class="bi bi-key"></i> Ubah Password
-                                </button>
-                            </form>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-key me-2"></i>Ubah Password
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Account Info Tab -->
+                    <div class="tab-pane fade" id="info-tab">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">User ID</label>
+                                <p class="fw-semibold">#<?= $currentUser['id'] ?></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Role</label>
+                                <p class="fw-semibold">
+                                    <span class="badge bg-primary"><?= ucfirst($currentUser['role']) ?></span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Tanggal Bergabung</label>
+                                <p class="fw-semibold">
+                                    <?php
+                                    try {
+                                        $stmt = $db->prepare("SELECT created_at FROM users WHERE id = ?");
+                                        $stmt->execute([$currentUser['id']]);
+                                        $userData = $stmt->fetch();
+                                        echo date('d F Y', strtotime($userData['created_at'] ?? 'now'));
+                                    } catch (PDOException $e) {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Total Event Terdaftar</label>
+                                <p class="fw-semibold"><?= $totalRegistrations ?> Event</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -320,6 +715,20 @@ try {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('avatarPreview');
+                    const heroAvatar = document.getElementById('heroAvatar');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    heroAvatar.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('active');

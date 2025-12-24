@@ -26,6 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Convert datetime-local to MySQL datetime format
         $tanggal = str_replace('T', ' ', $_POST['tanggal']) . ':00';
 
+        $is_paid = isset($_POST['is_paid']) ? 1 : 0;
+        $price = $is_paid ? ($_POST['price'] ?? 0) : 0;
+
         $data = [
             'title' => $_POST['title'],
             'kategori' => $_POST['kategori'],
@@ -35,7 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'kuota' => $_POST['kuota'],
             'latitude' => $_POST['latitude'] ?? null,
             'longitude' => $_POST['longitude'] ?? null,
-            'created_by' => $currentUser['id']
+            'created_by' => $currentUser['id'],
+            'is_paid' => $is_paid,
+            'price' => $price
         ];
 
         $result = $eventService->createEvent($data);
@@ -58,6 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Convert datetime-local to MySQL datetime format
         $tanggal = str_replace('T', ' ', $_POST['tanggal']) . ':00';
 
+        $is_paid = isset($_POST['is_paid']) ? 1 : 0;
+        $price = $is_paid ? ($_POST['price'] ?? 0) : 0;
+
         $data = [
             'title' => $_POST['title'],
             'kategori' => $_POST['kategori'],
@@ -66,7 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'deskripsi' => $_POST['deskripsi'] ?? '',
             'kuota' => $_POST['kuota'],
             'latitude' => $_POST['latitude'] ?? null,
-            'longitude' => $_POST['longitude'] ?? null
+            'longitude' => $_POST['longitude'] ?? null,
+            'is_paid' => $is_paid,
+            'price' => $price
         ];
 
         $result = $eventService->updateEvent($id, $data);
@@ -262,6 +272,7 @@ $categories = $categoryService->getAllCategories();
                             <th>Kategori</th>
                             <th>Tanggal</th>
                             <th>Lokasi</th>
+                            <th>Harga</th>
                             <th>Kuota</th>
                             <th>Peserta</th>
                             <th>Aksi</th>
@@ -275,6 +286,14 @@ $categories = $categoryService->getAllCategories();
                                 <td><span class="badge bg-primary"><?= htmlspecialchars($event['kategori']) ?></span></td>
                                 <td><?= date('d/m/Y H:i', strtotime($event['tanggal'])) ?></td>
                                 <td><?= htmlspecialchars($event['lokasi']) ?></td>
+                                <td>
+                                    <?php if (!empty($event['price']) && $event['price'] > 0): ?>
+                                        <span class="badge bg-success">Rp
+                                            <?= number_format($event['price'], 0, ',', '.') ?></span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Gratis</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?= $event['kuota'] ?></td>
                                 <td><?= $event['registered_count'] ?? 0 ?></td>
                                 <td>
@@ -379,6 +398,23 @@ $categories = $categoryService->getAllCategories();
                             <div class="mb-3">
                                 <label class="form-label">Kuota</label>
                                 <input type="number" class="form-control" name="kuota" id="eventKuota" min="1" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_paid" name="is_paid"
+                                        onchange="togglePriceInput()">
+                                    <label class="form-check-label" for="is_paid">Event Berbayar</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="priceContainer" style="display: none;">
+                                <label class="form-label">Harga Tiket (Rp)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" class="form-control" name="price" id="eventPrice" min="0"
+                                        step="1000" placeholder="0">
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -725,52 +761,90 @@ $categories = $categoryService->getAllCategories();
 
             function resetForm() {
                 document.getElementById('eventForm').reset();
-                document.getElementById('formAction').value = 'create';
+                document.getElementById('action').value = 'create';
                 document.getElementById('eventId').value = '';
-                if (marker) {
-                    updateMarker(defaultLat, defaultLng);
+                document.getElementById('eventModalLabel').textContent = 'Tambah Event';
+                document.getElementById('latitude').value = '';
+                document.getElementById('longitude').value = '';
+                togglePriceInput(); // Reset price field visibility
+
+                if (map) {
+                    if (marker) map.removeLayer(marker);
                     map.setView([defaultLat, defaultLng], 13);
+                    marker = L.marker([defaultLat, defaultLng], {
+                        draggable: true,
+                        icon: eventIcon
+                    }).addTo(map);
+                    marker.on('dragend', onMarkerDragEnd);
+                }
+            }
+
+            function togglePriceInput() {
+                const isPaid = document.getElementById('is_paid').checked;
+                const priceContainer = document.getElementById('priceContainer');
+                const priceInput = document.getElementById('eventPrice');
+
+                if (isPaid) {
+                    priceContainer.style.display = 'block';
+                    priceInput.setAttribute('required', 'required');
+                } else {
+                    priceContainer.style.display = 'none';
+                    priceInput.removeAttribute('required');
+                    priceInput.value = '';
                 }
             }
 
             function editEvent(event) {
-                document.getElementById('formAction').value = 'update';
+                document.getElementById('eventModalLabel').textContent = 'Edit Event';
                 document.getElementById('eventId').value = event.id;
+                document.getElementById('action').value = 'update';
                 document.getElementById('eventTitle').value = event.title;
                 document.getElementById('eventKategori').value = event.kategori;
-
-                let tanggal = event.tanggal;
-                if (tanggal.includes(' ')) {
-                    tanggal = tanggal.replace(' ', 'T').substring(0, 16);
-                } else if (tanggal.includes('T')) {
-                    tanggal = tanggal.substring(0, 16);
-                }
-                document.getElementById('eventTanggal').value = tanggal;
-
-                document.getElementById('eventLokasi').value = event.lokasi;
-                document.getElementById('eventDeskripsi').value = event.deskripsi || '';
+                document.getElementById('eventTanggal').value = event.tanggal;
+                document.getElementById('lokasi').value = event.lokasi;
+                document.getElementById('eventDeskripsi').value = event.deskripsi;
                 document.getElementById('eventKuota').value = event.kuota;
 
-                const lat = event.latitude ? parseFloat(event.latitude) : defaultLat;
-                const lng = event.longitude ? parseFloat(event.longitude) : defaultLng;
+                // Handle Map
+                if (event.latitude && event.longitude) {
+                    const lat = parseFloat(event.latitude);
+                    const lng = parseFloat(event.longitude);
+                    document.getElementById('latitude').value = lat;
+                    document.getElementById('longitude').value = lng;
 
-                document.getElementById('eventLat').value = event.latitude || '';
-                document.getElementById('eventLng').value = event.longitude || '';
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker([lat, lng], {
+                        icon: eventIcon,
+                        draggable: true
+                    }).addTo(map);
 
-                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
-                modal.show();
+                    map.setView([lat, lng], 15);
 
-                // Modal shown event will trigger initMap, but we need to set the marker
-                if (map) {
-                    updateMarker(lat, lng);
-                    map.setView([lat, lng], 13);
-                } else {
-                    // If map not initialized yet, wait for shown.bs.modal
-                    eventModal.addEventListener('shown.bs.modal', function () {
-                        updateMarker(lat, lng);
-                        map.setView([lat, lng], 13);
-                    }, { once: true });
+                    marker.on('dragend', function (e) {
+                        const position = marker.getLatLng();
+                        updateLocationInput(position.lat, position.lng);
+                    });
                 }
+
+                // Handle Paid/Price
+                const isPaidCheckbox = document.getElementById('is_paid');
+                const priceInput = document.getElementById('eventPrice');
+                // Check if is_paid property exists (it might be 1 or 0 string from DB)
+                const isPaid = event.is_paid == 1 || event.price > 0;
+
+                isPaidCheckbox.checked = isPaid;
+                togglePriceInput();
+
+                if (isPaid) {
+                    priceInput.value = event.price;
+                }
+
+                new bootstrap.Modal(document.getElementById('eventModal')).show();
+
+                // Refresh map size after modal opens
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 500);
             }
         </script>
         <script>

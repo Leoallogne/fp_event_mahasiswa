@@ -118,7 +118,7 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
 
             <!-- Stats Cards -->
             <div class="row mb-4 g-3">
-                <div class="col-md-3">
+                <div class="col-md">
                     <div class="card stat-card bg-gradient-primary h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -129,7 +129,7 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md">
                     <div class="card stat-card bg-gradient-success h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -140,7 +140,20 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md">
+                    <div class="card stat-card bg-gradient-warning h-100"
+                        style="background: linear-gradient(135deg, #f2994a, #f2c94c);">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="card-title mb-0 opacity-75">Estimasi Pendapatan</h6>
+                                <i class="bi bi-cash-coin fs-4 opacity-75"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bold">Rp <?= number_format($stats['total_revenue'] ?? 0, 0, ',', '.') ?>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md">
                     <div class="card stat-card bg-gradient-info h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -151,8 +164,9 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card stat-card bg-gradient-warning h-100">
+                <div class="col-md">
+                    <div class="card stat-card bg-gradient-warning h-100"
+                        style="background: linear-gradient(135deg, #667eea, #764ba2);">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-title mb-0 opacity-75">Event Mendatang</h6>

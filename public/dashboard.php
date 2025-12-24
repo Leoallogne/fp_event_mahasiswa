@@ -81,562 +81,335 @@ $chartValues = [];
 
 foreach ($chartData as $data) {
     $chartLabels[] = $data['bulan'];
-    $chartValues[] = (int)$data['jumlah'];
+    $chartValues[] = (int) $data['jumlah'];
 }
 
 $chartLabels = array_reverse($chartLabels);
 $chartValues = array_reverse($chartValues);
+
+// Data untuk pie chart (distribusi kategori)
+$stmt = $db->prepare("
+    SELECT e.kategori, COUNT(*) as jumlah
+    FROM registrations r
+    JOIN events e ON r.event_id = e.id
+    WHERE r.user_id = ?
+    GROUP BY e.kategori
+");
+$stmt->execute([$currentUser['id']]);
+$categoryData = $stmt->fetchAll();
+
+$pieLabels = [];
+$pieValues = [];
+foreach ($categoryData as $data) {
+    $pieLabels[] = $data['kategori'];
+    $pieValues[] = (int) $data['jumlah'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard User - EventKu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --info: #4895ef;
-            --warning: #f7b731;
-            --danger: #ee5a24;
-            --light: #f8f9fa;
-            --dark: #212529;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --info-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+            --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --font-inter: 'Inter', sans-serif;
         }
 
         body {
-            background-color: #f5f7fb;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
+            background-color: #f3f4f6;
+            font-family: var(--font-inter);
+            color: #1f2937;
         }
 
-        /* Main Content - Compatibility with Sidebar */
         .main-content {
-            margin-left: 260px;
-            transition: margin-left 0.3s ease-in-out;
-            min-height: 100vh;
-            background-color: #f5f7fb;
-        }
-
-        .main-content.sidebar-collapsed {
-            margin-left: 70px;
-        }
-
-        /* Dashboard Header */
-        .dashboard-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .dashboard-header h1 {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            font-size: 2rem;
-        }
-
-        .dashboard-header p {
-            opacity: 0.9;
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        /* Stat Cards */
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.75rem 1.5rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-left: 250px;
+            padding: 2rem;
             transition: all 0.3s ease;
-            border-left: 4px solid;
+        }
+
+        .hero-banner {
+            background: var(--primary-gradient);
+            border-radius: 16px;
+            padding: 2.5rem;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
             position: relative;
             overflow: hidden;
-            text-align: center;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
-        .stat-card::before {
+        .hero-banner::before {
             content: '';
             position: absolute;
-            top: -20px;
-            right: -20px;
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 100%);
-            border-radius: 50%;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,0.1)' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.6;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            height: 100%;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .stat-card.primary { border-color: var(--primary); }
-        .stat-card.success { border-color: var(--success); }
-        .stat-card.info { border-color: var(--info); }
-        .stat-card.warning { border-color: var(--warning); }
-
-        .stat-card i {
-            font-size: 2.5rem;
-            opacity: 0.8;
-            margin-bottom: 1rem;
-            display: block;
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
         }
 
-        .stat-card .stat-number {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            line-height: 1;
+        .stat-card.primary::after {
+            background: var(--primary-gradient);
         }
 
-        .stat-card .stat-label {
-            color: #6c757d;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
+        .stat-card.success::after {
+            background: var(--success-gradient);
         }
 
-        /* Chart Card */
-        .chart-card {
-            background: white;
+        .stat-card.warning::after {
+            background: var(--warning-gradient);
+        }
+
+        .stat-card.info::after {
+            background: var(--info-gradient);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
             border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
-            height: 100%;
-        }
-
-        .chart-card .card-header {
-            background: transparent;
-            border: none;
-            padding: 0 0 1rem 0;
-            margin-bottom: 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .chart-card .card-header h3 {
-            color: var(--dark);
-            font-weight: 600;
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        /* Event Cards */
-        .event-card {
-            background: white;
-            border-radius: 8px;
-            padding: 1.25rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
-            border-left: 3px solid var(--primary);
-        }
-
-        .event-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .event-date {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 0.75rem;
-            border-radius: 8px;
-            text-align: center;
-            min-width: 70px;
-        }
-
-        .event-date .day {
-            font-size: 1.5rem;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        .event-date .month {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            opacity: 0.9;
-        }
-
-        .event-info h5 {
-            color: var(--dark);
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-            font-size: 1rem;
-        }
-
-        .event-info .event-meta {
-            color: #6c757d;
-            font-size: 0.85rem;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #6c757d;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            opacity: 0.3;
-            margin-bottom: 1rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 991.98px) {
-            .main-content {
-                margin-left: 0 !important;
-                padding-top: 80px;
-            }
-            
-            .dashboard-header {
-                padding: 1.5rem 0;
-                margin-bottom: 1.5rem;
-            }
-            
-            .dashboard-header h1 {
-                font-size: 1.8rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .dashboard-header p {
-                font-size: 0.9rem;
-            }
-            
-            .dashboard-header .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
-            
-            .stat-card {
-                padding: 1.5rem;
-                margin-bottom: 1rem;
-                min-height: 120px;
-            }
-            
-            .stat-card .stat-number {
-                font-size: 2rem;
-            }
-            
-            .stat-card .stat-label {
-                font-size: 0.85rem;
-            }
-            
-            .chart-card {
-                padding: 1.5rem;
-                margin-bottom: 1.5rem;
-            }
-            
-            .chart-card .card-header h3 {
-                font-size: 1.1rem;
-            }
-            
-            .event-card {
-                padding: 1rem !important;
-            }
-            
-            .event-date {
-                min-width: 50px !important;
-            }
-            
-            .event-date .day {
-                font-size: 1.2rem;
-            }
-            
-            .event-date .month {
-                font-size: 0.8rem;
-            }
-            
-            .event-info h5 {
-                font-size: 0.95rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .event-meta {
-                font-size: 0.85rem;
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .dashboard-header .row {
-                text-align: center;
-            }
-            
-            .dashboard-header .col-md-4 {
-                text-align: center !important;
-                margin-top: 1rem;
-            }
-            
-            .dashboard-header h1 {
-                font-size: 1.6rem;
-            }
-            
-            .stat-card {
-                min-height: 100px;
-                padding: 1.2rem;
-            }
-            
-            .stat-card i {
-                font-size: 2.5rem;
-            }
-            
-            .stat-card .stat-number {
-                font-size: 1.8rem;
-            }
-            
-            .chart-card .btn-group {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .chart-card .btn-group .btn {
-                margin-bottom: 0.25rem;
-            }
-        }
-
-        @media (max-width: 575.98px) {
-            .dashboard-header {
-                padding: 1rem 0;
-                margin-bottom: 1rem;
-            }
-            
-            .dashboard-header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .dashboard-header p {
-                font-size: 0.85rem;
-            }
-            
-            .container-fluid {
-                padding-left: 1rem !important;
-                padding-right: 1rem !important;
-            }
-            
-            .row.g-3 {
-                --bs-gutter-x: 0.75rem;
-                --bs-gutter-y: 0.75rem;
-            }
-            
-            .stat-card {
-                padding: 1rem;
-                min-height: 90px;
-            }
-            
-            .stat-card i {
-                font-size: 2rem;
-            }
-            
-            .stat-card .stat-number {
-                font-size: 1.6rem;
-            }
-            
-            .stat-card .stat-label {
-                font-size: 0.75rem;
-            }
-            
-            .chart-card {
-                padding: 1rem;
-                margin-bottom: 1rem;
-            }
-            
-            .chart-card .card-header {
-                padding-bottom: 0.75rem;
-            }
-            
-            .chart-card .card-header h3 {
-                font-size: 1rem;
-            }
-            
-            .event-card {
-                padding: 0.75rem !important;
-            }
-            
-            .event-date {
-                min-width: 45px !important;
-            }
-            
-            .event-date .day {
-                font-size: 1rem;
-            }
-            
-            .event-date .month {
-                font-size: 0.7rem;
-            }
-            
-            .event-info h5 {
-                font-size: 0.9rem;
-            }
-            
-            .event-meta {
-                font-size: 0.8rem;
-            }
-            
-            .table {
-                font-size: 0.85rem;
-            }
-            
-            .table th,
-            .table td {
-                padding: 0.5rem;
-            }
-            
-            .badge {
-                font-size: 0.75rem;
-            }
-            
-            .btn-sm {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.75rem;
-            }
-        }
-    /* Notification Items */
-        .notification-item {
-            transition: background-color 0.2s ease;
-        }
-        
-        .notification-item:hover {
-            background-color: rgba(67, 97, 238, 0.05) !important;
-        }
-        
-        .notification-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(67, 97, 238, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card.primary .stat-icon {
+            background: rgba(79, 70, 229, 0.1);
+            color: #4f46e5;
+        }
+
+        .stat-card.success .stat-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .stat-card.warning .stat-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .stat-card.info .stat-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item:hover {
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .date-badge {
+            background: #eff6ff;
+            color: #3b82f6;
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 60px;
+            margin-right: 1rem;
+        }
+
+        .date-badge .day {
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .date-badge .month {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
         }
     </style>
-    
-    <?php
-    // Helper functions for notifications
-    function getNotificationIcon($type) {
-        switch ($type) {
-            case 'reminder':
-                return 'bi-bell';
-            case 'confirmation':
-                return 'bi-check-circle';
-            case 'update':
-                return 'bi-info-circle';
-            case 'cancelled':
-                return 'bi-x-circle';
-            default:
-                return 'bi-bell';
-        }
-    }
-
-    function formatNotificationTime($datetime) {
-        $timestamp = strtotime($datetime);
-        $now = time();
-        $diff = $now - $timestamp;
-
-        if ($diff < 60) {
-            return 'Baru saja';
-        } elseif ($diff < 3600) {
-            $minutes = floor($diff / 60);
-            return $minutes . ' menit yang lalu';
-        } elseif ($diff < 86400) {
-            $hours = floor($diff / 3600);
-            return $hours . ' jam yang lalu';
-        } elseif ($diff < 604800) {
-            $days = floor($diff / 86400);
-            return $days . ' hari yang lalu';
-        } else {
-            return date('d M Y H:i', $timestamp);
-        }
-    }
-    ?>
 </head>
+
 <body>
-    <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
-    
-    <!-- Main Content -->
+
     <div class="main-content">
-        <!-- Dashboard Header -->
-        <div class="dashboard-header">
-            <div class="container-fluid">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h1>Selamat Datang, <?= htmlspecialchars($currentUser['nama'] ?? 'User') ?>!</h1>
-                        <p>Kelola event Anda dan pantau aktivitas terbaru</p>
-                    </div>
-                    <div class="col-md-4 text-md-end">
-                        <a href="index.php" class="btn btn-light btn-lg">
-                            <i class="bi bi-search"></i> Jelajahi Event
-                        </a>
-                    </div>
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <div class="row align-items-center position-relative" style="z-index: 1;">
+                <div class="col-lg-8">
+                    <h1 class="display-6 fw-bold mb-2">Halo, <?= htmlspecialchars($currentUser['nama'] ?? 'User') ?>! 👋
+                    </h1>
+                    <p class="mb-0 opacity-90 fs-5">Selamat datang kembali di dashboard event Anda.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <a href="index.php" class="btn btn-light text-primary fw-semibold px-4 py-2 shadow-sm">
+                        <i class="bi bi-compass me-2"></i>Jelajahi Event
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="container-fluid px-3">
-            <!-- Stats Cards -->
-            <div class="row g-3 mb-4">
-                <div class="col-lg-3 col-md-6">
+        <div class="container-fluid px-0">
+            <!-- Stats Grid -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
                     <div class="stat-card primary">
-                        <i class="bi bi-calendar-event text-primary"></i>
-                        <div class="stat-number"><?= $totalEvents ?></div>
-                        <div class="stat-label">Total Event Diikuti</div>
+                        <div class="stat-icon">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h2 class="fw-bold mb-1"><?= $totalEvents ?></h2>
+                        <span class="text-muted fw-medium">Total Event Diikuti</span>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-md-3">
                     <div class="stat-card success">
-                        <i class="bi bi-calendar-check text-success"></i>
-                        <div class="stat-number"><?= $upcomingCount ?></div>
-                        <div class="stat-label">Event Mendatang</div>
+                        <div class="stat-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h2 class="fw-bold mb-1"><?= $upcomingCount ?></h2>
+                        <span class="text-muted fw-medium">Event Mendatang</span>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-md-3">
                     <div class="stat-card info">
-                        <i class="bi bi-check-circle text-info"></i>
-                        <div class="stat-number"><?= $completedEvents ?></div>
-                        <div class="stat-label">Event Selesai</div>
+                        <div class="stat-icon">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                        <h2 class="fw-bold mb-1"><?= $completedEvents ?></h2>
+                        <span class="text-muted fw-medium">Event Selesai</span>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-md-3">
                     <div class="stat-card warning">
-                        <i class="bi bi-graph-up text-warning"></i>
-                        <div class="stat-number"><?= number_format(($completedEvents / max($totalEvents, 1)) * 100, 0) ?>%</div>
-                        <div class="stat-label">Tingkat Kehadiran</div>
+                        <div class="stat-icon">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                        <h2 class="fw-bold mb-1">
+                            <?= number_format(($completedEvents / max($totalEvents, 1)) * 100, 0) ?>%
+                        </h2>
+                        <span class="text-muted fw-medium">Tingkat Kehadiran</span>
                     </div>
                 </div>
             </div>
 
-                <!-- Chart and Events Section -->
-            <div class="row g-3 mb-4">
-                <!-- Chart Section -->
-                <div class="col-lg-8">
+            <?php
+            // Helper functions for notifications
+            if (!function_exists('getNotificationIcon')) {
+                function getNotificationIcon($type)
+                {
+                    switch ($type) {
+                        case 'reminder':
+                            return 'bi-bell';
+                        case 'confirmation':
+                            return 'bi-check-circle';
+                        case 'update':
+                            return 'bi-info-circle';
+                        case 'cancelled':
+                            return 'bi-x-circle';
+                        default:
+                            return 'bi-bell';
+                    }
+                }
+            }
+
+            if (!function_exists('formatNotificationTime')) {
+                function formatNotificationTime($datetime)
+                {
+                    $timestamp = strtotime($datetime);
+                    $now = time();
+                    $diff = $now - $timestamp;
+
+                    if ($diff < 60)
+                        return 'Baru saja';
+                    elseif ($diff < 3600)
+                        return floor($diff / 60) . ' menit yang lalu';
+                    elseif ($diff < 86400)
+                        return floor($diff / 3600) . ' jam yang lalu';
+                    elseif ($diff < 604800)
+                        return floor($diff / 86400) . ' hari yang lalu';
+                    else
+                        return date('d M Y H:i', $timestamp);
+                }
+            }
+            ?>
+
+            <!-- Chart and Events Section -->
+            <div class="row g-4 mb-4">
+                <!-- Activity Chart Section -->
+                <div class="col-lg-6">
                     <div class="chart-card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3>Aktivitas Event Saya</h3>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-secondary">Minggu Ini</button>
-                                <button class="btn btn-outline-secondary active">Bulan Ini</button>
-                                <button class="btn btn-outline-secondary">Tahun Ini</button>
-                            </div>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Aktivitas Bulanan</h5>
                         </div>
-                        <div class="card-body">
+                        <div style="height: 300px;">
                             <?php if (!empty($chartLabels)): ?>
-                                <canvas id="activityChart" height="120"></canvas>
+                                <canvas id="activityChart"></canvas>
                             <?php else: ?>
-                                <div class="empty-state py-4">
-                                    <i class="bi bi-graph-up"></i>
+                                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                    <i class="bi bi-bar-chart fs-1 mb-2 opacity-25"></i>
                                     <p class="mb-0">Belum ada data aktivitas</p>
                                 </div>
                             <?php endif; ?>
@@ -644,77 +417,116 @@ $chartValues = array_reverse($chartValues);
                     </div>
                 </div>
 
-                <!-- Upcoming Events -->
-                <div class="col-lg-4">
+                <!-- Category Pie Chart Section -->
+                <div class="col-lg-6">
                     <div class="chart-card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3>Event Mendatang</h3>
-                            <a href="my-events.php" class="btn btn-sm btn-primary">Lihat Semua</a>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Distribusi Kategori</h5>
                         </div>
-                        <div class="card-body p-0">
-                            <?php if (count($upcomingEvents) > 0): ?>
-                                <?php foreach ($upcomingEvents as $event): ?>
-                                    <a href="event-detail.php?id=<?= $event['id'] ?>" class="text-decoration-none text-dark">
-                                        <div class="d-flex align-items-center p-3 event-card">
-                                            <div class="event-date me-3">
-                                                <div class="day"><?= date('d', strtotime($event['tanggal'])) ?></div>
-                                                <div class="month"><?= date('M', strtotime($event['tanggal'])) ?></div>
-                                            </div>
-                                            <div class="event-info flex-grow-1">
-                                                <h5 class="mb-1"><?= htmlspecialchars($event['nama'] ?? 'Event Tidak Diketahui') ?></h5>
-                                                <div class="event-meta">
-                                                    <i class="bi bi-geo-alt"></i> <?= htmlspecialchars($event['lokasi'] ?? 'Lokasi Tidak Diketahui') ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                <?php endforeach; ?>
+                        <div style="height: 300px;">
+                            <?php if (!empty($pieLabels)): ?>
+                                <canvas id="categoryChart"></canvas>
                             <?php else: ?>
-                                <div class="empty-state py-4">
-                                    <i class="bi bi-calendar-x"></i>
-                                    <p class="mb-0">Tidak ada event mendatang</p>
-                                    <a href="index.php" class="btn btn-primary btn-sm mt-2">Cari Event</a>
+                                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                    <i class="bi bi-pie-chart fs-1 mb-2 opacity-25"></i>
+                                    <p class="mb-0">Belum ada data kategori</p>
                                 </div>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
+
+                <!-- Upcoming Events -->
+                <div class="col-lg-12">
+                    <div class="chart-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Event Mendatang</h5>
+                            <a href="my-events.php" class="text-decoration-none text-primary fw-semibold small">Lihat
+                                Semua</a>
+                        </div>
+
+                        <?php if (count($upcomingEvents) > 0): ?>
+                            <div class="d-flex flex-column gap-3">
+                                <?php foreach ($upcomingEvents as $event): ?>
+                                    <a href="event-detail.php?id=<?= $event['id'] ?>" class="text-decoration-none text-dark">
+                                        <div class="event-item p-0 border-0">
+                                            <div class="date-badge">
+                                                <div class="day"><?= date('d', strtotime($event['tanggal'])) ?></div>
+                                                <div class="month"><?= date('M', strtotime($event['tanggal'])) ?></div>
+                                            </div>
+                                            <div class="flex-grow-1 min-width-0">
+                                                <h6 class="fw-bold mb-1 text-truncate">
+                                                    <?= htmlspecialchars($event['nama'] ?? 'Event') ?>
+                                                </h6>
+                                                <div class="text-muted small text-truncate">
+                                                    <i class="bi bi-geo-alt me-1"></i><?= htmlspecialchars($event['lokasi']) ?>
+                                                </div>
+                                            </div>
+                                            <i class="bi bi-chevron-right text-muted ms-2"></i>
+                                        </div>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-5 text-muted">
+                                <div class="mb-3">
+                                    <i class="bi bi-calendar-x fs-1 opacity-25"></i>
+                                </div>
+                                <p class="mb-3">Tidak ada event mendatang</p>
+                                <a href="index.php" class="btn btn-primary btn-sm rounded-pill px-3">Cari Event</a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
 
-                <!-- Notifications Section -->
-            <div class="row g-3">
+            <!-- Notifications and Activities Section -->
+            <div class="row g-4 mb-4">
                 <div class="col-lg-6">
                     <div class="chart-card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3>Notifikasi Terbaru</h3>
-                            <a href="notifications.php" class="btn btn-sm btn-primary">Lihat Semua</a>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Notifikasi Terbaru</h5>
+                            <a href="notifications.php"
+                                class="text-decoration-none text-primary fw-semibold small">Lihat Semua</a>
                         </div>
-                        <div class="card-body p-0">
+                        <div class="d-flex flex-column gap-3">
                             <?php
                             $recentNotifications = $notificationService->getUserNotifications($currentUser['id'], 3);
                             ?>
                             <?php if (!empty($recentNotifications)): ?>
                                 <?php foreach ($recentNotifications as $notification): ?>
-                                    <div class="notification-item p-3 border-bottom <?= !$notification['is_read'] ? 'bg-light' : '' ?>">
-                                        <div class="d-flex align-items-start">
-                                            <div class="notification-icon me-3">
-                                                <i class="bi <?= getNotificationIcon($notification['type']) ?> text-primary"></i>
+                                    <div class="d-flex align-items-start p-3 bg-light rounded-3 bg-opacity-50">
+                                        <div class="flex-shrink-0 me-3">
+                                            <div class="bg-white rounded-circle p-2 shadow-sm d-flex align-items-center justify-content-center"
+                                                style="width: 40px; height: 40px;">
+                                                <i
+                                                    class="bi <?= getNotificationIcon($notification['type']) ?> text-primary"></i>
                                             </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1"><?= htmlspecialchars($notification['title'] ?? 'Notifikasi') ?></h6>
-                                                <p class="mb-1 small text-muted"><?= htmlspecialchars($notification['message'] ?? '') ?></p>
-                                                <small class="text-muted"><?= formatNotificationTime($notification['created_at']) ?></small>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <h6 class="fw-bold mb-0 text-dark">
+                                                    <?= htmlspecialchars($notification['title'] ?? 'Notifikasi') ?>
+                                                </h6>
+                                                <?php if (!$notification['is_read']): ?>
+                                                    <span class="badge bg-danger rounded-pill flex-shrink-0 ms-2"
+                                                        style="font-size: 0.6rem;">BARU</span>
+                                                <?php endif; ?>
                                             </div>
-                                            <?php if (!$notification['is_read']): ?>
-                                                <span class="badge bg-primary rounded-pill">Baru</span>
-                                            <?php endif; ?>
+                                            <p class="text-secondary small mb-1 lh-sm">
+                                                <?= htmlspecialchars($notification['message'] ?? '') ?>
+                                            </p>
+                                            <small class="text-muted" style="font-size: 0.75rem;">
+                                                <i
+                                                    class="bi bi-clock me-1"></i><?= formatNotificationTime($notification['created_at']) ?>
+                                            </small>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <div class="empty-state py-4">
-                                    <i class="bi bi-bell-slash"></i>
-                                    <p class="mb-0">Tidak ada notifikasi</p>
+                                <div class="text-center py-5 text-muted">
+                                    <i class="bi bi-bell-slash fs-1 opacity-25 mb-3"></i>
+                                    <p class="mb-0">Tidak ada notifikasi baru</p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -724,92 +536,89 @@ $chartValues = array_reverse($chartValues);
                 <!-- Recent Activities -->
                 <div class="col-lg-6">
                     <div class="chart-card">
-                        <div class="card-header">
-                            <h3>Aktivitas Terbaru</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Aktivitas Terbaru</h5>
                         </div>
-                        <div class="card-body p-0">
-                            <?php
-                            $stmt = $db->prepare("
-                                SELECT e.*, r.status, e.tanggal as event_date
-                                FROM registrations r
-                                JOIN events e ON r.event_id = e.id
-                                WHERE r.user_id = ?
-                                ORDER BY e.tanggal DESC
-                                LIMIT 5
-                            ");
-                            $stmt->execute([$currentUser['id']]);
-                            $recentActivities = $stmt->fetchAll();
-                            ?>
 
-                            <?php if (!empty($recentActivities)): ?>
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="table-light">
+                        <?php
+                        $stmt = $db->prepare("
+                            SELECT e.*, r.status, e.tanggal as event_date
+                            FROM registrations r
+                            JOIN events e ON r.event_id = e.id
+                            WHERE r.user_id = ?
+                            ORDER BY e.tanggal DESC
+                            LIMIT 5
+                        ");
+                        $stmt->execute([$currentUser['id']]);
+                        $recentActivities = $stmt->fetchAll();
+                        ?>
+
+                        <?php if (!empty($recentActivities)): ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="bg-light bg-opacity-50">
+                                        <tr>
+                                            <th class="border-0 ps-3 py-3 text-secondary text-uppercase small fw-bold">Event
+                                            </th>
+                                            <th class="border-0 py-3 text-secondary text-uppercase small fw-bold">Status
+                                            </th>
+                                            <th
+                                                class="border-0 pe-3 py-3 text-end text-secondary text-uppercase small fw-bold">
+                                                Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($recentActivities as $activity): ?>
+                                            <?php
+                                            $statusBadge = '';
+                                            if ($activity['status'] === 'confirmed')
+                                                $statusBadge = '<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Terdaftar</span>';
+                                            elseif ($activity['status'] === 'pending')
+                                                $statusBadge = '<span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">Menunggu</span>';
+                                            else
+                                                $statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Dibatalkan</span>';
+                                            ?>
                                             <tr>
-                                                <th>Event</th>
-                                                <th>Tanggal</th>
-                                                <th>Lokasi</th>
-                                                <th>Status</th>
-                                                <th>Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($recentActivities as $activity): ?>
-                                                <?php
-                                                $statusClass = '';
-                                                $statusText = '';
-                                                if ($activity['status'] === 'confirmed') {
-                                                    $statusClass = 'success';
-                                                    $statusText = 'Dikonfirmasi';
-                                                } elseif ($activity['status'] === 'pending') {
-                                                    $statusClass = 'warning';
-                                                    $statusText = 'Menunggu';
-                                                } else {
-                                                    $statusClass = 'danger';
-                                                    $statusText = 'Dibatalkan';
-                                                }
-                                                ?>
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="event-date me-3" style="min-width: 60px;">
-                                                                <div class="day"><?= date('d', strtotime($activity['tanggal'])) ?></div>
-                                                                <div class="month"><?= date('M', strtotime($activity['tanggal'])) ?></div>
+                                                <td class="border-bottom-0 ps-3 py-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary bg-opacity-10 rounded p-2 me-3 text-primary text-center"
+                                                            style="min-width: 50px;">
+                                                            <div class="fw-bold small">
+                                                                <?= date('M', strtotime($activity['tanggal'])) ?>
                                                             </div>
-                                                            <div>
-                                                                <strong><?= htmlspecialchars($activity['nama'] ?? 'Event Tidak Diketahui') ?></strong>
+                                                            <div class="h6 mb-0 fw-bold">
+                                                                <?= date('d', strtotime($activity['tanggal'])) ?>
                                                             </div>
                                                         </div>
-                                                    </td>
-                                                    <td><?= date('d M Y', strtotime($activity['tanggal'])) ?></td>
-                                                    <td>
-                                                        <i class="bi bi-geo-alt text-muted me-1"></i>
-                                                        <?= htmlspecialchars($activity['lokasi'] ?? 'Lokasi Tidak Diketahui') ?>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-<?= $statusClass ?> rounded-pill">
-                                                            <?= $statusText ?>
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <a href="event-detail.php?id=<?= $activity['id'] ?>" 
-                                                           class="btn btn-sm btn-outline-primary">
-                                                            <i class="bi bi-eye"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <?php else: ?>
-                                <div class="empty-state py-4">
-                                    <i class="bi bi-clock-history"></i>
-                                    <p class="mb-0">Belum ada aktivitas</p>
-                                    <a href="index.php" class="btn btn-primary btn-sm mt-2">Mulai Jelajahi Event</a>
-                                </div>
-                            <?php endif; ?>
-                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-0 text-dark">
+                                                                <?= htmlspecialchars($activity['nama'] ?? 'Event') ?>
+                                                            </h6>
+                                                            <small class="text-muted"><i
+                                                                    class="bi bi-geo-alt me-1"></i><?= htmlspecialchars($activity['lokasi'] ?? '') ?></small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="border-bottom-0 py-3"><?= $statusBadge ?></td>
+                                                <td class="border-bottom-0 pe-3 py-3 text-end">
+                                                    <a href="event-detail.php?id=<?= $activity['id'] ?>"
+                                                        class="btn btn-sm btn-light rounded-circle" data-bs-toggle="tooltip"
+                                                        title="Lihat Detail">
+                                                        <i class="bi bi-chevron-right"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-clock-history fs-1 opacity-25 mb-3"></i>
+                                <p class="mb-3">Belum ada aktivitas</p>
+                                <a href="index.php" class="btn btn-primary btn-sm rounded-pill px-3">Mulai Jelajahi</a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -820,28 +629,69 @@ $chartValues = array_reverse($chartValues);
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Initialize Chart when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            // Activity Chart
-            const chartCanvas = document.getElementById('activityChart');
-            if (chartCanvas && <?= !empty($chartLabels) ? 'true' : 'false' ?>) {
-                const ctx = chartCanvas.getContext('2d');
-                const activityChart = new Chart(ctx, {
-                    type: 'line',
+        document.addEventListener('DOMContentLoaded', function () {
+            // Enable Bootstrap Tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+
+            // Activity Chart (Bar)
+            const activityCtx = document.getElementById('activityChart')?.getContext('2d');
+            if (activityCtx && <?= !empty($chartLabels) ? 'true' : 'false' ?>) {
+                new Chart(activityCtx, {
+                    type: 'bar',
                     data: {
                         labels: <?= json_encode($chartLabels) ?>,
                         datasets: [{
                             label: 'Jumlah Event',
                             data: <?= json_encode($chartValues) ?>,
-                            borderColor: '#4361ee',
-                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                            borderWidth: 3,
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#fff',
-                            pointBorderColor: '#4361ee',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7
+                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                            borderColor: '#4f46e5',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                            hoverBackgroundColor: '#4f46e5'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                                padding: 12,
+                                cornerRadius: 8
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#f3f4f6', drawBorder: false },
+                                ticks: { stepSize: 1 }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Category Chart (Pie)
+            const categoryCtx = document.getElementById('categoryChart')?.getContext('2d');
+            if (categoryCtx && <?= !empty($pieLabels) ? 'true' : 'false' ?>) {
+                new Chart(categoryCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: <?= json_encode($pieLabels) ?>,
+                        datasets: [{
+                            data: <?= json_encode($pieValues) ?>,
+                            backgroundColor: [
+                                '#4f46e5', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
                         }]
                     },
                     options: {
@@ -849,90 +699,24 @@ $chartValues = array_reverse($chartValues);
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: false
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: { family: "'Inter', sans-serif", size: 12 }
+                                }
                             },
                             tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
                                 padding: 12,
-                                cornerRadius: 8,
-                                titleFont: {
-                                    size: 14,
-                                    weight: 'bold'
-                                },
-                                bodyFont: {
-                                    size: 13
-                                }
+                                cornerRadius: 8
                             }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    display: true,
-                                    drawBorder: false,
-                                    color: 'rgba(0, 0, 0, 0.05)'
-                                },
-                                ticks: {
-                                    precision: 0,
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    font: {
-                                        size: 11
-                                    }
-                                }
-                            }
-                        },
-                        interaction: {
-                            intersect: false,
-                            mode: 'index'
                         }
                     }
                 });
             }
-
-            // Animate stat cards on scroll
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.animation = 'fadeIn 0.6s ease-out forwards';
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, observerOptions);
-
-            document.querySelectorAll('.stat-card').forEach(card => {
-                observer.observe(card);
-            });
         });
-
-        // Add fade in animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
+
 </html>

@@ -23,7 +23,31 @@ CREATE TABLE IF NOT EXISTS categories (
     nama VARCHAR(255) NOT NULL UNIQUE,
     deskripsi TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFA📢 *PENGUMUMAN*
+*PENGUMPULAN LAPORAN FINAL PROJECT*
+
+Diberitahukan kepada seluruh mahasiswa bahwa pengumpulan laporan Final Project (FP) dilaksanakan dengan ketentuan sebagai berikut:
+
+🗓 Deadline Pengumpulan
+*Tanggal 21 Desember 2025*
+Pukul 23.59 WIB
+
+📂 Berkas yang Wajib Dikumpulkan:
+
+1. Video penjelasan aplikasi/sistem
+2. Laporan Final Project
+3. Link GitHub project
+4. Database (DB)
+
+🎥 Ketentuan Video:
+
+1. Durasi maksimal 3 menit
+2. Tidak perlu pembukaan dan perkenalan
+3. Fokus pada penjelasan fitur dan alur system , contoh video  ( https://www.youtube.com/watch?v=6dHmu1GALmA )
+
+⏰ Pengumpulan melewati batas waktu yang ditentukan *tidak akan diterima.*
+
+Demikian pengumuman ini disampaikan. *Harap diperhatikan dan dilaksanakan dengan sebaik-baiknya.*ULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Events Table
 CREATE TABLE IF NOT EXISTS events (
