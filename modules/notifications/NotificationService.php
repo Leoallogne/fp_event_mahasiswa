@@ -224,7 +224,7 @@ class NotificationService
 
             foreach ($users as $user) {
                 // Create in-app notification
-                $this->createNotification($user['id'], 0, $message, 'info'); // 0 for system/global event
+                $this->createNotification($user['id'], null, $message, 'info'); // null for system/global event
                 $successCount++;
 
                 if ($sendEmail) {
