@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
+
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/session.php';
 require_once __DIR__ . '/../../modules/users/Auth.php';
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = trim($_POST['nama'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $role = $_POST['role'] ?? 'user';
-    
+
     if (empty($nama) || empty($email)) {
         $message = 'Nama dan email wajib diisi';
         $messageType = 'danger';
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messageType = 'danger';
     } else {
         $result = $auth->updateUser($userId, $nama, $email, $role);
-        
+
         if ($result['success']) {
             header('Location: users.php');
             exit;
@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,11 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         body {
             background-color: #f8f9fa;
         }
+
         .main-content {
             margin-left: 250px;
             padding: 20px;
             transition: margin-left 0.3s ease;
         }
+
         @media (max-width: 768px) {
             .main-content {
                 margin-left: 0 !important;
@@ -70,9 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
+
 <body>
     <?php include '../includes/sidebar.php'; ?>
-    
+
     <div class="main-content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -98,42 +102,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="nama" class="form-label">Nama Lengkap</label>
-                                    <input type="text" class="form-control" id="nama" name="nama" 
-                                           value="<?= htmlspecialchars($user['nama']) ?>" required>
+                                    <input type="text" class="form-control" id="nama" name="nama"
+                                        value="<?= htmlspecialchars($user['nama']) ?>" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" 
-                                           value="<?= htmlspecialchars($user['email']) ?>" required>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="<?= htmlspecialchars($user['email']) ?>" required>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="role" class="form-label">Role</label>
                                     <select class="form-select" id="role" name="role" required>
-                                        <option value="user" <?= $user['role'] === 'user' ? 'selected' : '' ?>>User</option>
-                                        <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>Admin</option>
+                                        <option value="user" <?= $user['role'] === 'user' ? 'selected' : '' ?>>User
+                                        </option>
+                                        <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>Admin
+                                        </option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Tanggal Daftar</label>
-                                    <input type="text" class="form-control" value="<?= date('d/m/Y', strtotime($user['created_at'])) ?>" readonly>
+                                    <input type="text" class="form-control"
+                                        value="<?= date('d/m/Y', strtotime($user['created_at'])) ?>" readonly>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i>
-                            <strong>Catatan:</strong> Password tidak dapat diubah dari halaman ini. Jika perlu mengubah password, gunakan fitur reset password.
+                            <strong>Catatan:</strong> Password tidak dapat diubah dari halaman ini. Jika perlu mengubah
+                            password, gunakan fitur reset password.
                         </div>
-                        
+
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save"></i> Simpan Perubahan
@@ -150,4 +158,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

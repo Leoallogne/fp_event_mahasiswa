@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-session_start();
+
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/session.php';
 require_once __DIR__ . '/../../modules/users/Auth.php';
@@ -46,29 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Peserta - Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/admin-modern.css">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            transition: margin-left 0.3s ease;
-        }
-
         .proof-img {
             max-width: 100px;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
         }
 
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0 !important;
-            }
+        .proof-img:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -78,19 +68,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     <div class="main-content">
         <div class="container-fluid">
-            <h2 class="mb-4">
-                <i class="bi bi-people"></i> Daftar Peserta: <?= htmlspecialchars($event['title']) ?>
-            </h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold"><i class="bi bi-people me-2"></i>Daftar Peserta:
+                    <?= htmlspecialchars($event['title']) ?>
+                </h2>
+            </div>
 
             <?php if (isset($_GET['success'])): ?>
                 <div class="alert alert-success">Status peserta berhasil diperbarui.</div>
             <?php endif; ?>
 
-            <div class="card">
+            <div class="glass-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <p class="mb-0"><strong>Total Peserta:</strong> <?= count($participants) ?> /
-                            <?= $event['kuota'] ?></p>
+                            <?= $event['kuota'] ?>
+                        </p>
                         <a href="event-participants.php" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
@@ -103,14 +96,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
-                                <thead class="table-light">
+                                <thead class="bg-light">
                                     <tr>
-                                        <th>No</th>
+                                        <th class="ps-4">No</th>
                                         <th>Nama & Email</th>
                                         <th>Waktu Daftar</th>
                                         <th>Status</th>
                                         <th>Bukti Bayar</th>
-                                        <th>Aksi</th>
+                                        <th class="text-end pe-4">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>

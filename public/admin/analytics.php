@@ -1,54 +1,19 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/session.php';
 require_once __DIR__ . '/../../modules/users/Auth.php';
-require_once __DIR__ . '/../../analytics/AnalyticsService.php';
+require_once __DIR__ . '/../../modules/analytics/AnalyticsService.php';
 
 $auth = new Auth();
 $auth->requireAdmin();
 
 $analytics = new AnalyticsService();
-
-// Handle CSV export - MUST BE BEFORE ANY HTML OUTPUT
-if (isset($_GET['export'])) {
-    $type = $_GET['export'];
-
-    if ($type === 'category') {
-        $data = $analytics->hitungKategoriEventTerbanyakPeminat();
-        // Format data dengan header yang jelas
-        $formattedData = [];
-        foreach ($data as $row) {
-            $formattedData[] = [
-                'Kategori' => $row['kategori'],
-                'Total Peserta' => (int) $row['total_peserta'],
-                'Total Event' => (int) $row['total_event']
-            ];
-        }
-        $analytics->exportToCSV($formattedData, 'kategori_event_' . date('Y-m-d') . '.csv');
-    } elseif ($type === 'monthly') {
-        $data = $analytics->trenJumlahEventBulanan(12);
-        // Format data dengan header yang jelas
-        $formattedData = [];
-        foreach ($data as $row) {
-            $formattedData[] = [
-                'Bulan' => $row['bulan'],
-                'Jumlah Event' => (int) $row['jumlah_event'],
-                'Total Peserta' => (int) $row['total_peserta']
-            ];
-        }
-        $analytics->exportToCSV($formattedData, 'tren_bulanan_' . date('Y-m-d') . '.csv');
-    } elseif ($type === 'events') {
-        $analytics->exportEventsToCSV();
-    } elseif ($type === 'registrations') {
-        $analytics->exportRegistrationsToCSV();
-    }
-}
-
-$categoryStats = $analytics->hitungKategoriEventTerbanyakPeminat();
-$monthlyTrend = $analytics->trenJumlahEventBulanan(12);
+$stats = $analytics->getEventStats();
+$eventParticipation = $analytics->getEventParticipationStats(10);
+$revenueByEvent = $analytics->getRevenueByEvent(10);
+$revenueTrend = $analytics->getRevenueTrend(6);
 $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
-$recommendations = $analytics->rekomendasiEvent(null, 10);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -56,108 +21,12 @@ $recommendations = $analytics->rekomendasiEvent(null, 10);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analitik - Admin</title>
+    <title>Analitik & Laporan - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #4e79a7;
-            --secondary-color: #f28e2b;
-            --bg-gradient: linear-gradient(135deg, #e0f7fa, #e0f2f1);
-        }
-
-        body {
-            background: var(--bg-gradient);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border: none;
-        }
-
-        .card-header {
-            background: transparent;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .card-body {
-            color: #34495e;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            transition: margin-left 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0 !important;
-            }
-        }
-
-        /* Custom UI */
-        .btn-modern {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-modern-primary {
-            background: linear-gradient(135deg, var(--primary-color), #2c5282);
-            color: white;
-        }
-
-        .btn-modern-success {
-            background: linear-gradient(135deg, #00b09b, #96c93d);
-            color: white;
-        }
-
-        .btn-modern-info {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            color: white;
-        }
-
-        .table-custom th {
-            font-weight: 600;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            border-bottom: 2px solid #f0f2f5;
-        }
-
-        .table-custom td {
-            vertical-align: middle;
-            color: #2c3e50;
-        }
-
-        .table-custom tr:hover td {
-            background-color: rgba(240, 242, 245, 0.4);
-        }
-
-        .hero-banner {
-            background: linear-gradient(135deg, #ffffff, #f0f7ff);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-    </style>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/admin-modern.css">
 </head>
 
 <body>
@@ -166,182 +35,250 @@ $recommendations = $analytics->rekomendasiEvent(null, 10);
     <div class="main-content">
         <div class="container-fluid">
             <!-- Hero Banner -->
-            <div class="p-4 mb-4 rounded-3 shadow-sm hero-banner">
-                <h1 class="display-5 fw-bold" style="color: #2c3e50;">Dashboard Analitik</h1>
-                <p class="lead mb-0" style="color: #34495e;">Ringkasan performa event, tren bulanan, dan rekomendasi
-                    terbaru.</p>
+            <div class="hero-banner mb-4">
+                <h2 class="fw-bold mb-2"><i class="bi bi-graph-up me-2"></i>Analitik & Laporan</h2>
+                <p class="mb-0 opacity-75">Analisis mendalam aktivitas event, partisipasi, dan pendapatan</p>
             </div>
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="bi bi-graph-up"></i> Analitik & Laporan</h2>
-                <div class="d-flex gap-2 flex-wrap">
-                    <a href="?export=category" class="btn-modern btn-modern-success text-decoration-none">
-                        <i class="bi bi-download"></i> Kategori
-                    </a>
-                    <a href="?export=monthly" class="btn-modern btn-modern-success text-decoration-none">
-                        <i class="bi bi-download"></i> Tren Bulanan
-                    </a>
-                    <a href="?export=events" class="btn-modern btn-modern-info text-decoration-none">
-                        <i class="bi bi-download"></i> Event
-                    </a>
-                    <a href="?export=registrations" class="btn-modern btn-modern-info text-decoration-none">
-                        <i class="bi bi-download"></i> Peserta
-                    </a>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4 g-3">
+                <div class="col-md-3">
+                    <div class="card stat-card h-100" style="background: var(--primary-gradient);">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="card-title mb-0 opacity-75">Total Event</h6>
+                                <i class="bi bi-calendar-event fs-4 opacity-75"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bold"><?= $stats['total_events'] ?? 0 ?></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card h-100" style="background: linear-gradient(135deg, #00b74a, #00a846);">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="card-title mb-0 opacity-75">Total Peserta</h6>
+                                <i class="bi bi-people fs-4 opacity-75"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bold"><?= $stats['total_registrations'] ?? 0 ?></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card h-100" style="background: linear-gradient(135deg, #f2994a, #f2c94c);">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="card-title mb-0 opacity-75">Total Pendapatan</h6>
+                                <i class="bi bi-cash-coin fs-4 opacity-75"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bold">Rp <?= number_format($stats['total_revenue'] ?? 0, 0, ',', '.') ?>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card h-100" style="background: var(--info-gradient);">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="card-title mb-0 opacity-75">Rata-rata Peserta</h6>
+                                <i class="bi bi-graph-up fs-4 opacity-75"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bold"><?= number_format($avgParticipants['rata_rata'] ?? 0, 1) ?></h2>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Category Stats -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card">
+            <!-- Charts Row -->
+            <div class="row mb-4 g-3">
+                <!-- Chart 1: Event Participation -->
+                <div class="col-lg-4">
+                    <div class="glass-card h-100">
                         <div class="card-header">
-                            <h5>Kategori Event Terbanyak Peminat</h5>
+                            <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Partisipasi Event</h5>
+                            <small class="text-muted">Top 10 event berdasarkan jumlah peserta</small>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-custom table-borderless align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>Kategori</th>
-                                            <th>Total Peserta</th>
-                                            <th>Total Event</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (empty($categoryStats)): ?>
-                                            <tr>
-                                                <td colspan="3" class="text-center text-muted">
-                                                    <i class="bi bi-info-circle"></i> Belum ada data kategori event
-                                                </td>
-                                            </tr>
-                                        <?php else: ?>
-                                            <?php foreach ($categoryStats as $stat): ?>
-                                                <tr>
-                                                    <td><?= htmlspecialchars($stat['kategori']) ?></td>
-                                                    <td><?= $stat['total_peserta'] ?></td>
-                                                    <td><?= $stat['total_event'] ?></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <canvas id="participationChart" style="max-height: 350px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Revenue by Event -->
+                <div class="col-lg-4">
+                    <div class="glass-card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-cash-stack me-2"></i>Pendapatan per Event</h5>
+                            <small class="text-muted">Top 10 event berbayar berdasarkan revenue</small>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueByEventChart" style="max-height: 350px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Revenue Trend -->
+                <div class="col-lg-4">
+                    <div class="glass-card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Tren Pendapatan</h5>
+                            <small class="text-muted">Pendapatan 6 bulan terakhir</small>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenueTrendChart" style="max-height: 350px;"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Average Stats -->
-            <?php if ($avgParticipants): ?>
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>Rata-rata Peserta per Event</h5>
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Rata-rata:</strong> <?= $avgParticipants['rata_rata'] ?> peserta/event</p>
-                                <p><strong>Total Event:</strong> <?= $avgParticipants['total_event'] ?></p>
-                                <p><strong>Total Peserta:</strong> <?= $avgParticipants['total_peserta'] ?></p>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Export Section -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-download me-2"></i>Export Data</h5>
                 </div>
-            <?php endif; ?>
-
-            <!-- Monthly Trend Chart -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Tren Jumlah Event Bulanan</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="monthlyChart" height="100"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recommendations -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Rekomendasi Event</h5>
-                        </div>
-                        <div class="card-body">
-                            <?php if (empty($recommendations)): ?>
-                                <p>Tidak ada rekomendasi event saat ini.</p>
-                            <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-custom table-borderless align-middle">
-                                        <thead>
-                                            <tr>
-                                                <th>Event</th>
-                                                <th>Kategori</th>
-                                                <th>Tanggal</th>
-                                                <th>Kuota Tersedia</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($recommendations as $rec): ?>
-                                                <tr>
-                                                    <td><?= htmlspecialchars($rec['title']) ?></td>
-                                                    <td><?= htmlspecialchars($rec['kategori']) ?></td>
-                                                    <td><?= date('d/m/Y H:i', strtotime($rec['tanggal'])) ?></td>
-                                                    <td><?= $rec['available_quota'] ?></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Download laporan lengkap registrasi dalam format CSV</p>
+                    <a href="export-csv.php" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>Download CSV
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const monthlyData = <?= json_encode($monthlyTrend) ?>;
-        const monthlyLabels = monthlyData.map(item => item.bulan);
-        const monthlyValues = monthlyData.map(item => parseInt(item.jumlah_event));
+        // Chart 1: Event Participation
+        const participationData = <?= json_encode($eventParticipation) ?>;
+        const participationLabels = participationData.map(item => {
+            // Truncate long titles
+            return item.title.length > 15 ? item.title.substring(0, 15) + '...' : item.title;
+        });
+        const participationValues = participationData.map(item => parseInt(item.participant_count));
 
-        new Chart(document.getElementById('monthlyChart'), {
-            type: 'line',
+        new Chart(document.getElementById('participationChart'), {
+            type: 'bar',
             data: {
-                labels: monthlyLabels,
+                labels: participationLabels,
                 datasets: [{
-                    label: 'Jumlah Event',
-                    data: monthlyValues,
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    tension: 0.1,
-                    fill: true
+                    label: 'Jumlah Peserta',
+                    data: participationValues,
+                    backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                    borderColor: '#4361ee',
+                    borderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Revenue by Event
+        const revenueData = <?= json_encode($revenueByEvent) ?>;
+        const revenueLabels = revenueData.map(item => {
+            return item.title.length > 15 ? item.title.substring(0, 15) + '...' : item.title;
+        });
+        const revenueValues = revenueData.map(item => parseInt(item.total_revenue));
+
+        new Chart(document.getElementById('revenueByEventChart'), {
+            type: 'bar',
+            data: {
+                labels: revenueLabels,
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: revenueValues,
+                    backgroundColor: 'rgba(242, 153, 74, 0.7)',
+                    borderColor: '#f2994a',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'Rp ' + context.parsed.x.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return 'Rp ' + (value / 1000) + 'K';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: Revenue Trend
+        const trendData = <?= json_encode($revenueTrend) ?>;
+        const trendLabels = trendData.map(item => item.month);
+        const trendValues = trendData.map(item => parseInt(item.monthly_revenue));
+
+        new Chart(document.getElementById('revenueTrendChart'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Pendapatan Bulanan',
+                    data: trendValues,
+                    borderColor: '#00b74a',
+                    backgroundColor: 'rgba(0, 183, 74, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#00b74a',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return 'Rp ' + (value / 1000) + 'K';
+                            }
+                        }
                     }
                 }
             }
         });
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
-        }
-    </script>
-
 </body>
 
 </html>

@@ -73,7 +73,9 @@ class GoogleAuth
 
         $data = json_decode($response, true);
         if (isset($data['access_token'])) {
-            return $this->getUserInfo($data['access_token']);
+            $userInfo = $this->getUserInfo($data['access_token']);
+            // Merge token data with user info
+            return array_merge($userInfo, $data);
         }
         return null;
     }
@@ -94,12 +96,33 @@ class GoogleAuth
     public function findOrCreateUser($googleUser)
     {
         try {
+            // Prepare token data
+            $accessToken = $googleUser['access_token'] ?? null;
+            $refreshToken = $googleUser['refresh_token'] ?? null;
+            $expiresIn = $googleUser['expires_in'] ?? 3600;
+            $created = time();
+
             // Check if user exists by google_id
             $stmt = $this->db->prepare("SELECT * FROM users WHERE google_id = ?");
             $stmt->execute([$googleUser['sub']]);
             $user = $stmt->fetch();
 
             if ($user) {
+                // Update tokens
+                $sql = "UPDATE users SET google_access_token = ?, google_token_expires_in = ?, google_token_created = ?";
+                $params = [$accessToken, $expiresIn, $created];
+
+                if ($refreshToken) {
+                    $sql .= ", google_refresh_token = ?";
+                    $params[] = $refreshToken;
+                }
+
+                $sql .= " WHERE id = ?";
+                $params[] = $user['id'];
+
+                $updateStmt = $this->db->prepare($sql);
+                $updateStmt->execute($params);
+
                 return $user;
             }
 
@@ -109,19 +132,35 @@ class GoogleAuth
             $user = $stmt->fetch();
 
             if ($user) {
-                // Link google_id to existing user
-                $stmt = $this->db->prepare("UPDATE users SET google_id = ? WHERE id = ?");
-                $stmt->execute([$googleUser['sub'], $user['id']]);
+                // Link google_id to existing user and update tokens
+                $sql = "UPDATE users SET google_id = ?, google_access_token = ?, google_token_expires_in = ?, google_token_created = ?";
+                $params = [$googleUser['sub'], $accessToken, $expiresIn, $created];
+
+                if ($refreshToken) {
+                    $sql .= ", google_refresh_token = ?";
+                    $params[] = $refreshToken;
+                }
+
+                $sql .= " WHERE id = ?";
+                $params[] = $user['id'];
+
+                $updateStmt = $this->db->prepare($sql);
+                $updateStmt->execute($params);
+
                 $user['google_id'] = $googleUser['sub'];
                 return $user;
             }
 
             // Create new user
-            $stmt = $this->db->prepare("INSERT INTO users (nama, email, google_id, role, password) VALUES (?, ?, ?, 'user', '')");
+            $stmt = $this->db->prepare("INSERT INTO users (nama, email, google_id, role, password, google_access_token, google_refresh_token, google_token_expires_in, google_token_created) VALUES (?, ?, ?, 'user', '', ?, ?, ?, ?)");
             $stmt->execute([
                 $googleUser['name'],
                 $googleUser['email'],
-                $googleUser['sub']
+                $googleUser['sub'],
+                $accessToken,
+                $refreshToken,
+                $expiresIn,
+                $created
             ]);
 
             $newId = $this->db->lastInsertId();

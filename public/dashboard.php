@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../modules/users/Auth.php';
@@ -11,7 +11,7 @@ $auth->requireUser();
 
 // Redirect admin ke dashboard admin
 if ($auth->isAdmin()) {
-    header('Location: /admin/dashboard.php');
+    header('Location: admin/dashboard.php');
     exit();
 }
 
@@ -636,9 +636,20 @@ foreach ($categoryData as $data) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             })
 
+            // Chart Defaults
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b';
+
             // Activity Chart (Bar)
-            const activityCtx = document.getElementById('activityChart')?.getContext('2d');
-            if (activityCtx && <?= !empty($chartLabels) ? 'true' : 'false' ?>) {
+            const activityCanvas = document.getElementById('activityChart');
+            if (activityCanvas && <?= !empty($chartLabels) ? 'true' : 'false' ?>) {
+                const activityCtx = activityCanvas.getContext('2d');
+
+                // Create Gradient
+                const gradientBar = activityCtx.createLinearGradient(0, 0, 0, 300);
+                gradientBar.addColorStop(0, '#4f46e5'); // Primary
+                gradientBar.addColorStop(1, '#818cf8'); // Lighter purple
+
                 new Chart(activityCtx, {
                     type: 'bar',
                     data: {
@@ -646,11 +657,11 @@ foreach ($categoryData as $data) {
                         datasets: [{
                             label: 'Jumlah Event',
                             data: <?= json_encode($chartValues) ?>,
-                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                            borderColor: '#4f46e5',
-                            borderWidth: 1,
-                            borderRadius: 8,
-                            hoverBackgroundColor: '#4f46e5'
+                            backgroundColor: gradientBar,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            barThickness: 24,
+                            maxBarThickness: 40
                         }]
                     },
                     options: {
@@ -659,58 +670,106 @@ foreach ($categoryData as $data) {
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                titleColor: '#111827',
+                                bodyColor: '#4b5563',
+                                borderColor: '#e5e7eb',
+                                borderWidth: 1,
                                 padding: 12,
-                                cornerRadius: 8
+                                displayColors: false,
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.parsed.y + ' Event';
+                                    }
+                                }
                             }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                grid: { color: '#f3f4f6', drawBorder: false },
-                                ticks: { stepSize: 1 }
+                                grid: {
+                                    color: '#f3f4f6',
+                                    borderDash: [5, 5],
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    font: { size: 11 },
+                                    stepSize: 1
+                                }
                             },
                             x: {
-                                grid: { display: false }
+                                grid: { display: false },
+                                ticks: { font: { size: 11 } }
                             }
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeOutQuart'
                         }
                     }
                 });
             }
 
-            // Category Chart (Pie)
-            const categoryCtx = document.getElementById('categoryChart')?.getContext('2d');
-            if (categoryCtx && <?= !empty($pieLabels) ? 'true' : 'false' ?>) {
+            // Category Chart (Doughnut)
+            const categoryCanvas = document.getElementById('categoryChart');
+            if (categoryCanvas && <?= !empty($pieLabels) ? 'true' : 'false' ?>) {
+                const categoryCtx = categoryCanvas.getContext('2d');
+
                 new Chart(categoryCtx, {
-                    type: 'pie',
+                    type: 'doughnut',
                     data: {
                         labels: <?= json_encode($pieLabels) ?>,
                         datasets: [{
                             data: <?= json_encode($pieValues) ?>,
                             backgroundColor: [
-                                '#4f46e5', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6'
+                                '#4f46e5', // Indigo
+                                '#0ea5e9', // Sky
+                                '#10b981', // Emerald
+                                '#f59e0b', // Amber
+                                '#f43f5e', // Rose
+                                '#8b5cf6'  // Violet
                             ],
-                            borderWidth: 2,
-                            borderColor: '#ffffff'
+                            borderWidth: 0,
+                            hoverOffset: 4
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        cutout: '75%', // Thinner ring
                         plugins: {
                             legend: {
                                 position: 'bottom',
                                 labels: {
                                     usePointStyle: true,
+                                    pointStyle: 'circle',
                                     padding: 20,
-                                    font: { family: "'Inter', sans-serif", size: 12 }
+                                    font: { size: 11 }
                                 }
                             },
                             tooltip: {
-                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                titleColor: '#111827',
+                                bodyColor: '#4b5563',
+                                borderColor: '#e5e7eb',
+                                borderWidth: 1,
                                 padding: 12,
-                                cornerRadius: 8
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.label || '';
+                                        let value = context.parsed || 0;
+                                        let total = context.chart._metasets[context.datasetIndex].total;
+                                        let percentage = Math.round((value / total) * 100) + '%';
+                                        return `${label}: ${value} (${percentage})`;
+                                    }
+                                }
                             }
+                        },
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                            duration: 1500,
+                            easing: 'easeOutQuart'
                         }
                     }
                 });

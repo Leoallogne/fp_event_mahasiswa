@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../modules/users/Auth.php';
@@ -300,7 +300,7 @@ $unreadCount = $notificationService->getUnreadCount($currentUser['id']);
                             <div class="notification-content">
                                 <h5 class="notif-title"><?= htmlspecialchars($notification['title'] ?? 'Notifikasi') ?></h5>
                                 <p class="notif-message">
-                                    <?= htmlspecialchars($notification['message'] ?? '') ?>
+                                    <?= $notification['message'] ?? '' ?>
                                 </p>
                                 <div class="notif-footer">
                                     <span class="notif-time">
@@ -340,6 +340,12 @@ $unreadCount = $notificationService->getUnreadCount($currentUser['id']);
                 return 'icon-update';
             case 'cancelled':
                 return 'icon-cancelled';
+            case 'welcome':
+                return 'icon-confirmation';
+            case 'security':
+                return 'icon-cancelled';
+            case 'info':
+                return 'icon-update';
             default:
                 return 'icon-reminder';
         }
@@ -356,6 +362,12 @@ $unreadCount = $notificationService->getUnreadCount($currentUser['id']);
                 return 'bi-info-circle-fill';
             case 'cancelled':
                 return 'bi-x-circle-fill';
+            case 'welcome':
+                return 'bi-emoji-smile-fill';
+            case 'security':
+                return 'bi-shield-lock-fill';
+            case 'info':
+                return 'bi-info-circle-fill';
             default:
                 return 'bi-bell-fill';
         }

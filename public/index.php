@@ -1,20 +1,16 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../modules/users/Auth.php';
 require_once __DIR__ . '/../modules/events/EventService.php';
 require_once __DIR__ . '/../modules/registrations/RegistrationService.php';
+require_once __DIR__ . '/../modules/analytics/AnalyticsService.php';
 
 $auth = new Auth();
 $eventService = new EventService();
 $registrationService = new RegistrationService();
-
-// Redirect if not logged in
-if (!$auth->isLoggedIn()) {
-    header('Location: landing.php');
-    exit;
-}
+$analyticsService = new AnalyticsService();
 
 // Redirect if admin
 if ($auth->isAdmin()) {
@@ -31,6 +27,9 @@ if (!empty($keyword) || !empty($category)) {
 } else {
     $events = $eventService->getAllEvents();
 }
+
+// Get Stats
+$stats = $analyticsService->getEventStats();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -38,396 +37,358 @@ if (!empty($keyword) || !empty($category)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jelajahi Event - EventKu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>EventKu - Jelajahi Event Kampus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/landing.css?v=<?= time() ?>">
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --card-gradient: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-            --font-inter: 'Inter', sans-serif;
-        }
-
         body {
-            background-color: #f3f4f6;
-            font-family: var(--font-inter);
-            color: #1f2937;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        .main-content {
-            margin-left: 250px;
-            padding: 2rem;
-            transition: all 0.3s ease;
+        /* Navbar Styling */
+        .navbar-landing {
+            background-color: transparent;
+            transition: all 0.3s ease-in-out;
+            padding: 1.5rem 0;
         }
 
-        /* Hero Wrapper */
-        .hero-section {
-            background: var(--primary-gradient);
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            color: white;
-            margin-bottom: 2.5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.5);
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .search-container {
-            background: rgba(255, 255, 255, 0.15);
+        .navbar-landing.scrolled {
+            background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 0.5rem;
-            max-width: 600px;
-            margin-top: 2rem;
-            display: flex;
-            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
         }
 
-        .search-input {
-            background: transparent;
-            border: none;
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
             color: white;
-            padding: 0.75rem 1rem;
-            width: 100%;
-            font-size: 1rem;
         }
 
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+        .navbar-landing.scrolled .navbar-brand {
+            color: var(--text-main);
         }
 
-        .search-input:focus {
-            outline: none;
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
         }
 
-        .search-btn {
-            background: white;
-            color: #4f46e5;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s;
+        .navbar-landing.scrolled .nav-link {
+            color: var(--text-main) !important;
         }
 
-        .search-btn:hover {
-            background: #f3f4f6;
-            transform: translateY(-1px);
+        .navbar-landing.scrolled .nav-link:hover {
+            color: var(--primary-color) !important;
         }
 
-        /* Event Card */
-        .event-card {
-            background: var(--card-gradient);
-            border: 1px solid rgba(229, 231, 235, 0.5);
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 100%;
-            position: relative;
-        }
-
-        .event-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header-visual {
-            height: 140px;
-            background: linear-gradient(45deg, #f3f4f6 0%, #e5e7eb 100%);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-pattern-1 {
-            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
-        }
-
-        .card-pattern-2 {
-            background: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
-        }
-
-        .card-pattern-3 {
-            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
-        }
-
-        .category-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255, 255, 255, 0.9);
+        .btn-nav-light {
+            background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(4px);
-            padding: 0.35rem 0.85rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #4b5563;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .price-badge {
-            position: absolute;
-            bottom: -15px;
-            right: 1.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 2;
-        }
-
-        .price-free {
-            background: #374151;
             color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .price-paid {
-            background: #10b981;
-            color: white;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-            padding-top: 1.5rem;
-        }
-
-        .event-date {
-            color: #6366f1;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .event-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 0.75rem;
-            line-height: 1.4;
-        }
-
-        .event-location {
-            color: #6b7280;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .event-location i {
-            margin-right: 0.5rem;
-            color: #9ca3af;
-        }
-
-        .event-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #f3f4f6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .btn-nav-light:hover {
             background: white;
+            color: var(--primary-color);
         }
 
-        .quota-info {
-            font-size: 0.85rem;
-            color: #6b7280;
-            font-weight: 500;
+        .navbar-landing.scrolled .btn-nav-light {
+            background: transparent;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
-        .btn-action {
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
+        .navbar-landing.scrolled .btn-nav-light:hover {
+            background: var(--primary-color);
+            color: white;
         }
 
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-
-            .hero-section {
-                padding: 2rem 1.5rem;
-            }
-
-            .search-container {
-                flex-direction: column;
-                padding: 0.75rem;
-            }
-
-            .search-input {
-                margin-bottom: 0.75rem;
-                text-align: center;
-            }
-
-            .search-btn {
-                width: 100%;
-            }
+        /* Adjust Hero needed due to fixed navbar */
+        .hero-wrapper {
+            padding-top: 8rem;
         }
     </style>
 </head>
 
 <body>
-    <?php include 'includes/sidebar.php'; ?>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top navbar-landing">
+        <div class="container">
+            <a class="navbar-brand" href="index.php">
+                Event<span class="text-primary">Ku.</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list fs-2 text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.php">Jelajahi</a></li>
+
+                    <li class="nav-item"><a class="nav-link" href="#stats">Statistik</a></li>
+                    <?php if ($auth->isLoggedIn()): ?>
+                        <li class="nav-item"><a class="nav-link" href="my-events.php">Event Saya</a></li>
+                        <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
+                    <?php endif; ?>
+                </ul>
+                <div class="d-flex gap-2">
+                    <?php if ($auth->isLoggedIn()): ?>
+                        <div class="dropdown">
+                            <button class="btn btn-nav-light rounded-pill px-4 dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i>
+                                <?= htmlspecialchars(explode(' ', $currentUser['nama'])[0]) ?>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2 rounded-4">
+                                <li><a class="dropdown-item rounded-3 mb-1" href="profile.php"><i
+                                            class="bi bi-person me-2 text-primary"></i> Profil</a></li>
+                                <li><a class="dropdown-item rounded-3 mb-1" href="my-events.php"><i
+                                            class="bi bi-calendar-check me-2 text-primary"></i> Tiket Saya</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item rounded-3 text-danger" href="logout.php"><i
+                                            class="bi bi-box-arrow-right me-2"></i> Keluar</a></li>
+                            </ul>
+                        </div>
+                    <?php else: ?>
+                        <a href="login.php" class="btn btn-nav-light rounded-pill px-4 fw-bold">Masuk</a>
+                        <a href="register.php" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Daftar</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <div class="main-content">
         <!-- Hero Section -->
-        <div class="hero-section text-center text-lg-start">
-            <div class="position-relative z-2">
-                <h1 class="display-5 fw-bold mb-3">Jelajahi Event Seru! 🚀</h1>
-                <p class="fs-5 opacity-90 mb-4" style="max-width: 600px;">
-                    Temukan dan ikuti berbagai kegiatan menarik di kampus. Mulai dari seminar, workshop, hingga
-                    kompetisi.
+        <div class="hero-wrapper">
+            <div class="hero-bg-animated"></div>
+            <div class="hero-content" data-aos="fade-up">
+                <span
+                    class="badge bg-white text-primary rounded-pill px-3 py-2 mb-4 fw-bold bg-opacity-10 backdrop-blur border border-white border-opacity-25">
+                    ✨ Platform Event Mahasiswa Terlengkap
+                </span>
+                <h1 class="hero-title mb-4">Temukan Pengalaman Baru, <br>Raih Prestasi Gemilang</h1>
+                <p class="hero-subtitle mx-auto" style="max-width: 600px;">
+                    Bergabunglah dengan ribuan mahasiswa lainnya. Temukan seminar, workshop, dan kompetisi yang akan
+                    mengembangkan potensimu.
                 </p>
-                
-                <form action="" method="GET" class="search-container">
-                    <i class="bi bi-search text-white opacity-75 ms-2 d-none d-lg-block"></i>
+
+                <form action="" method="GET" class="hero-search-container mt-5">
+                    <input type="text" name="q" class="hero-search-input"
+                        placeholder="Cari event (contoh: Seminar AI)..." value="<?= htmlspecialchars($keyword) ?>">
                     <?php if (!empty($category)): ?>
                         <input type="hidden" name="kategori" value="<?= htmlspecialchars($category) ?>">
                     <?php endif; ?>
-                    <input type="text" name="q" class="search-input" placeholder="Cari event menarik..." value="<?= htmlspecialchars($keyword) ?>">
-                    <button type="submit" class="search-btn">Cari</button>
+                    <button type="submit" class="hero-search-btn">
+                        <i class="bi bi-search me-2"></i>Cari
+                    </button>
                 </form>
             </div>
         </div>
 
-        <div class="container-fluid px-0">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="fw-bold mb-0">
-                    <?php if (!empty($keyword)): ?>
-                        Hasil pencarian: "<?= htmlspecialchars($keyword) ?>"
-                    <?php elseif (!empty($category)): ?>
-                        Kategori: <?= htmlspecialchars($category) ?>
-                    <?php else: ?>
-                        Event Terbaru
-                    <?php endif; ?>
-                </h4>
-                <div class="dropdown">
-                    <button class="btn btn-white border shadow-sm dropdown-toggle" type="button"
-                        data-bs-toggle="dropdown">
-                        <i class="bi bi-filter me-1"></i> 
-                        <?= !empty($category) ? htmlspecialchars($category) : 'Filter Kategori' ?>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="index.php<?= !empty($keyword) ? '?q='.urlencode($keyword) : '' ?>">Semua Kategori</a></li>
-                        <li><a class="dropdown-item" href="index.php?kategori=Akademik<?= !empty($keyword) ? '&q='.urlencode($keyword) : '' ?>">Akademik</a></li>
-                        <li><a class="dropdown-item" href="index.php?kategori=Non-Akademik<?= !empty($keyword) ? '&q='.urlencode($keyword) : '' ?>">Non-Akademik</a></li>
-                        <li><a class="dropdown-item" href="index.php?kategori=Seminar<?= !empty($keyword) ? '&q='.urlencode($keyword) : '' ?>">Seminar</a></li>
-                        <li><a class="dropdown-item" href="index.php?kategori=Workshop<?= !empty($keyword) ? '&q='.urlencode($keyword) : '' ?>">Workshop</a></li>
-                        <li><a class="dropdown-item" href="index.php?kategori=Lomba<?= !empty($keyword) ? '&q='.urlencode($keyword) : '' ?>">Lomba</a></li>
-                    </ul>
+        <!-- Stats Section -->
+        <div class="stats-container" id="stats">
+            <div class="stats-grid">
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                    <span class="stat-value"><?= $stats['total_events'] ?? 0 ?>+</span>
+                    <span class="stat-label">Event Tersedia</span>
+                </div>
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                    <span class="stat-value"><?= $stats['upcoming_events'] ?? 0 ?></span>
+                    <span class="stat-label">Event Mendatang</span>
+                </div>
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                    <span class="stat-value"><?= $stats['total_registrations'] ?? 0 ?>+</span>
+                    <span class="stat-label">Peserta Bergabung</span>
+                </div>
+                <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+                    <span class="stat-value"><?= $stats['total_users'] ?? 0 ?></span>
+                    <span class="stat-label">Mahasiswa Aktif</span>
                 </div>
             </div>
+        </div>
 
-            <?php if (empty($events)): ?>
-                <div class="text-center py-5">
-                    <div class="mb-3">
-                        <i class="bi bi-calendar-x display-1 text-muted opacity-25"></i>
-                    </div>
-                    <h5 class="text-muted fw-normal">Belum ada event yang tersedia saat ini.</h5>
+        <!-- Categories & Filter -->
+        <div class="category-section container" id="categories">
+            <!-- Events Grid -->
+            <div class="events-section p-0 bg-transparent">
+                <div class="section-title mb-4">
+                    <span>Event Terbaru</span>
                 </div>
-            <?php else: ?>
-                <div class="row g-4">
-                    <?php
-                    $patterns = ['card-pattern-1', 'card-pattern-2', 'card-pattern-3'];
-                    $i = 0;
-                    foreach ($events as $event):
-                        $isRegistered = $auth->isLoggedIn() ? $registrationService->isRegistered($currentUser['id'], $event['id']) : false;
-                        $availableQuota = $event['kuota'] - ($event['registered_count'] ?? 0);
-                        $patternClass = $patterns[$i % 3];
-                        $i++;
-                        ?>
-                        <div class="col-md-6 col-lg-4 col-xl-4">
-                            <div class="event-card">
-                                <div class="card-header-visual <?= $patternClass ?>">
-                                    <span class="category-badge">
-                                        <i class="bi bi-tag-fill me-1 text-primary"></i>
-                                        <?= htmlspecialchars($event['kategori']) ?>
-                                    </span>
-                                    <i class="bi bi-calendar-event fs-1 text-white opacity-50"></i>
 
-                                    <!-- Price Badge Floating -->
-                                    <?php if (!empty($event['price']) && $event['price'] > 0): ?>
-                                        <div class="price-badge price-paid">
-                                            Rp <?= number_format($event['price'], 0, ',', '.') ?>
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="price-badge price-free">
-                                            Gratis
-                                        </div>
-                                    <?php endif; ?>
+
+
+                <?php if (empty($events)): ?>
+                    <div class="text-center py-5">
+                        <img src="https://img.freepik.com/free-vector/no-data-concept-illustration_114360-536.jpg"
+                            alt="No Events" style="max-width: 300px; opacity: 0.8; mix-blend-mode: multiply;">
+                        <h5 class="text-muted mt-4 fw-normal">Belum ada event yang sesuai kriteria Anda.</h5>
+                        <a href="index.php" class="btn btn-primary mt-3 rounded-pill px-4">Lihat Semua Event</a>
+                    </div>
+                <?php else: ?>
+                    <div class="event-grid">
+                        <?php foreach ($events as $index => $event):
+                            $isRegistered = $auth->isLoggedIn() ? $registrationService->isRegistered($currentUser['id'], $event['id']) : false;
+                            $availableQuota = $event['kuota'] - ($event['registered_count'] ?? 0);
+
+                            $patternClass = 'pattern-seminar';
+                            if ($event['kategori'] == 'Akademik')
+                                $patternClass = 'pattern-academic';
+                            if ($event['kategori'] == 'Non-Akademik')
+                                $patternClass = 'pattern-non-academic';
+                            ?>
+                            <div class="modern-card" data-aos="fade-up" data-aos-delay="<?= ($index % 3) * 100 ?>">
+                                <div class="card-image-wrapper <?= $patternClass ?>">
+                                    <div class="card-badges">
+                                        <span class="badge-custom badge-category">
+                                            <?= htmlspecialchars($event['kategori']) ?>
+                                        </span>
+                                        <?php if (!empty($event['price']) && $event['price'] > 0): ?>
+                                            <span class="badge-custom badge-price">
+                                                Rp <?= number_format($event['price'], 0, ',', '.') ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge-custom badge-price free">Gratis</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
 
-                                <div class="card-body">
-                                    <span class="event-date">
-                                        <?= date('l, d M Y • H:i', strtotime($event['tanggal'])) ?>
-                                    </span>
-                                    <h5 class="event-title text-truncate" title="<?= htmlspecialchars($event['title']) ?>">
-                                        <?= htmlspecialchars($event['title']) ?>
-                                    </h5>
-                                    <div class="event-location">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        <span class="text-truncate"><?= htmlspecialchars($event['lokasi']) ?></span>
+                                <div class="card-content">
+                                    <div class="event-date-modern">
+                                        <i class="bi bi-calendar4-week"></i>
+                                        <?= date('d M Y, H:i', strtotime($event['tanggal'])) ?>
                                     </div>
-                                    <p class="text-muted small mb-0"
-                                        style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.6em;">
+                                    <h3 class="event-title-modern">
+                                        <?= htmlspecialchars($event['title']) ?>
+                                    </h3>
+                                    <div class="event-location-modern">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <?= htmlspecialchars($event['lokasi']) ?>
+                                    </div>
+                                    <p class="event-description-modern">
                                         <?= htmlspecialchars(strip_tags($event['deskripsi'])) ?>
                                     </p>
-                                </div>
 
-                                <div class="event-footer">
-                                    <div class="quota-info">
-                                        <i class="bi bi-people me-1"></i>
-                                        <?= $event['registered_count'] ?? 0 ?> / <?= $event['kuota'] ?> Peserta
-                                    </div>
-
-                                    <div class="d-flex gap-2">
-                                        <a href="event-detail.php?id=<?= $event['id'] ?>"
-                                            class="btn btn-action btn-outline-primary">
-                                            Detail
-                                        </a>
+                                    <div class="card-footer-modern">
+                                        <div class="participants-info">
+                                            <span class="participants-count">
+                                                <i class="bi bi-people-fill me-1 text-primary"></i>
+                                                <?= $event['registered_count'] ?? 0 ?> / <?= $event['kuota'] ?>
+                                            </span>
+                                        </div>
 
                                         <?php if ($auth->isLoggedIn() && !$isRegistered && $availableQuota > 0): ?>
-                                            <a href="register-event.php?id=<?= $event['id'] ?>" class="btn btn-action btn-primary">
-                                                Daftar
+                                            <a href="event-detail.php?id=<?= $event['id'] ?>"
+                                                class="btn-card-action btn-card-primary">
+                                                Lihat Detail <i class="bi bi-arrow-right ms-1"></i>
                                             </a>
                                         <?php elseif ($isRegistered): ?>
-                                            <button class="btn btn-action btn-success disabled border-0" style="opacity: 0.8;">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
+                                            <a href="event-detail.php?id=<?= $event['id'] ?>"
+                                                class="btn-card-action btn-card-outline text-success border-success">
+                                                <i class="bi bi-check-circle me-1"></i> Terdaftar
+                                            </a>
                                         <?php elseif ($availableQuota <= 0): ?>
-                                            <button class="btn btn-action btn-secondary disabled">
+                                            <button disabled class="btn-card-action btn-secondary opacity-75">
                                                 Penuh
                                             </button>
+                                        <?php else: ?>
+                                            <a href="event-detail.php?id=<?= $event['id'] ?>"
+                                                class="btn-card-action btn-card-outline">
+                                                Lihat Detail
+                                            </a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="modern-footer bg-white border-top">
+            <div class="container">
+                <div class="row gy-4">
+                    <div class="col-lg-4">
+                        <a href="index.php" class="footer-brand text-decoration-none">EventKu.</a>
+                        <p class="text-muted small">
+                            Platform manajemen event mahasiswa terdepan. Temukan, ikuti, dan kembangkan potensimu
+                            melalui berbagai kegiatan positif.
+                        </p>
+                    </div>
+                    <div class="col-lg-2 col-6">
+                        <h6 class="fw-bold mb-3">Event</h6>
+                        <ul class="footer-links">
+                            <li><a href="index.php">Jelajahi Semua</a></li>
+                            <li><a href="#stats">Statistik</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-6">
+                        <h6 class="fw-bold mb-3">Akun</h6>
+                        <ul class="footer-links">
+                            <?php if ($auth->isLoggedIn()): ?>
+                                <li><a href="profile.php">Profile</a></li>
+                                <li><a href="my-events.php">Event Saya</a></li>
+                                <li><a href="logout.php">Logout</a></li>
+                            <?php else: ?>
+                                <li><a href="login.php">Login</a></li>
+                                <li><a href="register.php">Daftar</a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4">
+                        <h6 class="fw-bold mb-3">Hubungi Kami</h6>
+                        <p class="text-muted small mb-2"><i class="bi bi-envelope me-2"></i>
+                            info@eventku.campus.ac.id
+                        </p>
+                        <p class="text-muted small"><i class="bi bi-telephone me-2"></i> +62 812 3456 7890</p>
+                        <div class="d-flex gap-3 mt-3">
+                            <a href="#" class="text-secondary"><i class="bi bi-instagram fs-5"></i></a>
+                            <a href="#" class="text-secondary"><i class="bi bi-twitter-x fs-5"></i></a>
+                            <a href="#" class="text-secondary"><i class="bi bi-facebook fs-5"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-top mt-5 pt-4 text-center text-muted small">
+                    &copy; <?= date('Y') ?> EventKu. All rights reserved. Made with ❤️ for Students.
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Init AOS
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function () {
+            const navbar = document.querySelector('.navbar-landing');
+            const toggleIcon = document.querySelector('.navbar-toggler i');
+
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+                if (toggleIcon) toggleIcon.classList.replace('text-white', 'text-dark');
+            } else {
+                navbar.classList.remove('scrolled');
+                if (toggleIcon) toggleIcon.classList.replace('text-dark', 'text-white');
+            }
+        });
+    </script>
 </body>
 
 </html>

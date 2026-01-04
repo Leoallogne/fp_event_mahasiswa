@@ -21,6 +21,20 @@ class RegistrationService
             if (!$stmt->fetch()) {
                 $this->db->exec("ALTER TABLE registrations ADD COLUMN payment_proof VARCHAR(255) NULL");
             }
+
+            // Ensure unique constraint for user_id + event_id to prevent double registration
+            // Check if index exists first (MySQL specific)
+            $stmt = $this->db->query("SHOW INDEX FROM registrations WHERE Key_name = 'unique_registration'");
+            if (!$stmt->fetch()) {
+                // Try adding it. If duplicate data exists, this might fail, so we catch exception
+                try {
+                    $this->db->exec("ALTER TABLE registrations ADD CONSTRAINT unique_registration UNIQUE (user_id, event_id)");
+                } catch (PDOException $e) {
+                    // Ignore if data conflict, or manually cleanup duplicates? 
+                    // For now, logged error is enough, we can't auto-clean safely.
+                    error_log("Could not add unique constraint: " . $e->getMessage());
+                }
+            }
         } catch (PDOException $e) {
             error_log("Migration Error: " . $e->getMessage());
         }
@@ -37,12 +51,11 @@ class RegistrationService
             }
 
             // Check quota
+            // Check quota using subquery for accuracy and performance
             $stmt = $this->db->prepare("SELECT kuota, 
-                                        COUNT(r.id) as registered_count
+                                        (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id AND r.status = 'confirmed') as registered_count
                                         FROM events e
-                                        LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'confirmed'
-                                        WHERE e.id = ?
-                                        GROUP BY e.id");
+                                        WHERE e.id = ?");
             $stmt->execute([$eventId]);
             $event = $stmt->fetch();
 
@@ -62,8 +75,17 @@ class RegistrationService
             $initialStatus = $isPaidEvent ? 'pending' : 'confirmed';
 
             // Register
-            $stmt = $this->db->prepare("INSERT INTO registrations (user_id, event_id, status) VALUES (?, ?, ?)");
-            $stmt->execute([$userId, $eventId, $initialStatus]);
+            // Register
+            // Use INSERT IGNORE or try-catch for unique constraint
+            try {
+                $stmt = $this->db->prepare("INSERT INTO registrations (user_id, event_id, status) VALUES (?, ?, ?)");
+                $stmt->execute([$userId, $eventId, $initialStatus]);
+            } catch (PDOException $e) {
+                if ($e->getCode() == 23000) { // Duplicate entry
+                    return ['success' => false, 'message' => 'Anda sudah terdaftar pada event ini'];
+                }
+                throw $e;
+            }
 
             // Create notification for successful registration
             require_once __DIR__ . '/../notifications/NotificationService.php';
@@ -129,7 +151,8 @@ class RegistrationService
     public function isRegistered($userId, $eventId)
     {
         try {
-            $stmt = $this->db->prepare("SELECT id FROM registrations WHERE user_id = ? AND event_id = ? AND status = 'confirmed'");
+            // Check for any active registration (confirmed or pending)
+            $stmt = $this->db->prepare("SELECT id FROM registrations WHERE user_id = ? AND event_id = ?");
             $stmt->execute([$userId, $eventId]);
             return $stmt->fetch() !== false;
         } catch (PDOException $e) {
@@ -196,6 +219,33 @@ class RegistrationService
         } catch (PDOException $e) {
             error_log("Get Registration Error: " . $e->getMessage());
             return null;
+        }
+    }
+    public function processPayment($userId, $eventId, $method)
+    {
+        try {
+            // Auto-confirm logic for demo
+            $status = 'confirmed';
+            // Store payment method as simple proof string
+            $proof = 'DEMO_PAID_' . strtoupper(str_replace(' ', '_', $method)) . '_' . time();
+
+            $stmt = $this->db->prepare("UPDATE registrations SET status = ?, payment_proof = ? WHERE user_id = ? AND event_id = ?");
+            $result = $stmt->execute([$status, $proof, $userId, $eventId]);
+
+            if ($result) {
+                // Send Notification
+                require_once __DIR__ . '/../notifications/NotificationService.php';
+                $notificationService = new NotificationService();
+                $notificationService->createPaymentSuccessNotification($userId, $eventId, $method);
+
+                // Add to Google Calendar if needed (optional, assuming handled by sync cron or immediate trigger if desired)
+                // For now we just confirm DB status
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Process Payment Error: " . $e->getMessage());
+            return false;
         }
     }
 }

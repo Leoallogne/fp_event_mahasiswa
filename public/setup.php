@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../modules/users/Auth.php';
@@ -12,13 +12,13 @@ $db = $database->getConnection();
 try {
     $stmt = $db->query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'");
     $result = $stmt->fetch();
-    
+
     // Jika sudah ada admin, redirect ke login
     if ($result['count'] > 0) {
         header('Location: login.php');
         exit;
     }
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     // Jika tabel belum ada, tetap tampilkan form setup
     error_log("Setup check error: " . $e->getMessage());
 }
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
-    
+
     // Validasi
     if (empty($nama) || empty($email) || empty($password)) {
         $error = 'Semua field harus diisi';
@@ -51,17 +51,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Hash password
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                
+
                 // Insert admin
                 $stmt = $db->prepare("INSERT INTO users (nama, email, password, role) VALUES (?, ?, ?, 'admin')");
                 $stmt->execute([$nama, $email, $hashedPassword]);
-                
+
                 $success = 'Admin berhasil dibuat! Silakan login.';
-                
+
                 // Redirect ke login setelah 2 detik
                 header("Refresh: 2; url=login.php");
             }
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Setup admin error: " . $e->getMessage());
             $error = 'Terjadi kesalahan saat membuat admin. Pastikan database sudah diimport.';
         }
@@ -70,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,10 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             justify-content: center;
         }
+
         .setup-card {
             max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
+
         .setup-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -97,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="row justify-content-center">
@@ -113,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
-                        
+
                         <?php if ($success): ?>
                             <div class="alert alert-success">
                                 <i class="bi bi-check-circle"></i> <?= htmlspecialchars($success) ?>
@@ -125,49 +129,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label for="nama" class="form-label">
                                         <i class="bi bi-person"></i> Nama Lengkap
                                     </label>
-                                    <input type="text" class="form-control" id="nama" name="nama" 
-                                           value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>" required>
+                                    <input type="text" class="form-control" id="nama" name="nama"
+                                        value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>" required>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="email" class="form-label">
                                         <i class="bi bi-envelope"></i> Email
                                     </label>
-                                    <input type="email" class="form-control" id="email" name="email" 
-                                           value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="password" class="form-label">
                                         <i class="bi bi-lock"></i> Password
                                     </label>
-                                    <input type="password" class="form-control" id="password" name="password" 
-                                           required minlength="6">
+                                    <input type="password" class="form-control" id="password" name="password" required
+                                        minlength="6">
                                     <small class="text-muted">Minimal 6 karakter</small>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="confirm_password" class="form-label">
                                         <i class="bi bi-lock-fill"></i> Konfirmasi Password
                                     </label>
-                                    <input type="password" class="form-control" id="confirm_password" 
-                                           name="confirm_password" required minlength="6">
+                                    <input type="password" class="form-control" id="confirm_password"
+                                        name="confirm_password" required minlength="6">
                                 </div>
-                                
+
                                 <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i> 
-                                    <strong>Penting:</strong> Halaman ini hanya bisa diakses sekali saat setup awal. 
+                                    <i class="bi bi-info-circle"></i>
+                                    <strong>Penting:</strong> Halaman ini hanya bisa diakses sekali saat setup awal.
                                     Simpan informasi login dengan baik!
                                 </div>
-                                
+
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="bi bi-person-plus"></i> Buat Admin
                                 </button>
                             </form>
                         <?php endif; ?>
-                        
+
                         <hr class="my-4">
-                        
+
                         <div class="text-center">
                             <small class="text-muted">
                                 <i class="bi bi-shield-check"></i> Halaman Setup - Event Management System
@@ -178,8 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
 
+</html>

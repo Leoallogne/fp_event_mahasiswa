@@ -51,8 +51,13 @@ body {
 }
 
 @keyframes rotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .hero-content {
@@ -81,8 +86,15 @@ body {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
 }
 
 .hero-title {
@@ -90,7 +102,7 @@ body {
     font-weight: 800;
     margin-bottom: 1rem;
     line-height: 1.2;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .hero-subtitle {
@@ -116,7 +128,7 @@ body {
     align-items: center;
     gap: 0.75rem;
     font-size: 1rem;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: transform 0.3s;
 }
 
@@ -144,7 +156,8 @@ body {
     right: 0;
     height: 10px;
     background: var(--primary-gradient);
-    display: none; /* Only show on mobile */
+    display: none;
+    /* Only show on mobile */
 }
 
 .form-wrapper {
@@ -211,7 +224,7 @@ body {
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
-.form-control-custom:focus + .input-icon {
+.form-control-custom:focus+.input-icon {
     color: #6366f1;
 }
 
@@ -363,9 +376,26 @@ body {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-    20%, 40%, 60%, 80% { transform: translateX(4px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-4px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(4px);
+    }
 }
 
 .alert-danger-custom {
@@ -402,9 +432,20 @@ body {
     width: 0%;
 }
 
-.strength-weak .strength-fill { width: 33%; background: #ef4444; }
-.strength-medium .strength-fill { width: 66%; background: #f59e0b; }
-.strength-strong .strength-fill { width: 100%; background: #10b981; }
+.strength-weak .strength-fill {
+    width: 33%;
+    background: #ef4444;
+}
+
+.strength-medium .strength-fill {
+    width: 66%;
+    background: #f59e0b;
+}
+
+.strength-strong .strength-fill {
+    width: 100%;
+    background: #10b981;
+}
 
 /* Animations */
 @keyframes fadeInUp {
@@ -412,6 +453,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -423,6 +465,7 @@ body {
         opacity: 0;
         transform: translateX(30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -434,6 +477,7 @@ body {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -451,13 +495,13 @@ body {
         min-height: auto;
         flex: 0 0 auto;
     }
-    
+
     .hero-content {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-    
+
     .hero-icon {
         width: 80px;
         height: 80px;
@@ -468,7 +512,7 @@ body {
     .hero-title {
         font-size: 2rem;
     }
-    
+
     .hero-subtitle {
         margin-bottom: 2rem;
         font-size: 1.1rem;
@@ -478,18 +522,18 @@ body {
         padding: 2rem 1.5rem;
         background: white;
     }
-    
+
     .auth-form-section::before {
         display: block;
     }
-    
+
     .form-wrapper {
         box-shadow: none;
         padding: 0;
         border: none;
         background: transparent;
     }
-    
+
     .form-title {
         font-size: 1.75rem;
     }

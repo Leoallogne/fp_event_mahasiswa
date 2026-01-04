@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/session.php';
 require_once __DIR__ . '/../modules/users/Auth.php';
@@ -301,6 +301,14 @@ $registrations = $registrationService->getUserRegistrations($currentUser['id']);
                                                 title="Lihat Detail" data-bs-toggle="tooltip">
                                                 <i class="bi bi-eye"></i>
                                             </a>
+
+                                            <!-- Google Calendar Link (Direct) -->
+                                            <?php if ($reg['status'] === 'confirmed'): ?>
+                                                <a href="export-calendar.php?id=<?= $reg['event_id'] ?>" class="btn-action"
+                                                    title="Add to Google Calendar" target="_blank" data-bs-toggle="tooltip">
+                                                    <i class="bi bi-calendar-plus"></i>
+                                                </a>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>

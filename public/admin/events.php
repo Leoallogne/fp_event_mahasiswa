@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/session.php';
 require_once __DIR__ . '/../../modules/users/Auth.php';
@@ -129,17 +129,9 @@ $categories = $categoryService->getAllCategories();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/admin-modern.css">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            transition: margin-left 0.3s ease;
-        }
-
         #map {
             height: 400px;
             width: 100%;
@@ -149,73 +141,10 @@ $categories = $categoryService->getAllCategories();
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
+        /* Leaflet Specifics kept for map functionality */
         .leaflet-popup-content {
             margin: 10px 15px;
             line-height: 1.4;
-        }
-
-        .leaflet-popup-content h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.1em;
-            color: #2c3e50;
-        }
-
-        .leaflet-popup-content p {
-            margin: 5px 0;
-            color: #34495e;
-        }
-
-        .leaflet-popup-content i {
-            width: 16px;
-            text-align: center;
-            margin-right: 5px;
-            color: #7f8c8d;
-        }
-
-        .map-container {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .map-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 5px;
-            border-radius: 4px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-map {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            margin: 2px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: white;
-            cursor: pointer;
-        }
-
-        .btn-map:hover {
-            background: #f8f9fa;
-        }
-
-        .search-container {
-            margin-bottom: 15px;
-        }
-
-        #search-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
         }
 
         .search-results {
@@ -249,10 +178,10 @@ $categories = $categoryService->getAllCategories();
     <div class="main-content">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="bi bi-calendar-event"></i> Manajemen Event</h2>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal"
+                <h2 class="fw-bold"><i class="bi bi-calendar-event me-2"></i>Manajemen Event</h2>
+                <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#eventModal"
                     onclick="resetForm()">
-                    <i class="bi bi-plus-circle"></i> Tambah Event
+                    <i class="bi bi-plus-lg me-2"></i>Tambah Event
                 </button>
             </div>
 
@@ -263,19 +192,19 @@ $categories = $categoryService->getAllCategories();
                 </div>
             <?php endif; ?>
 
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
+            <div class="glass-card table-responsive">
+                <table class="table table-hover">
+                    <thead class="bg-light">
                         <tr>
-                            <th>ID</th>
-                            <th>Judul</th>
+                            <th class="ps-4">ID</th>
+                            <th>Judul Event</th>
                             <th>Kategori</th>
-                            <th>Tanggal</th>
+                            <th>Jadwal</th>
                             <th>Lokasi</th>
                             <th>Harga</th>
                             <th>Kuota</th>
                             <th>Peserta</th>
-                            <th>Aksi</th>
+                            <th class="text-end pe-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -13,6 +13,13 @@ CREATE TABLE IF NOT EXISTS users (
     avatar VARCHAR(255) NULL,
     role ENUM('admin', 'user') DEFAULT 'user',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    email_notifications BOOLEAN DEFAULT 1,
+    reminder_notifications BOOLEAN DEFAULT 1,
+    update_notifications BOOLEAN DEFAULT 1,
+    google_access_token TEXT NULL,
+    google_refresh_token TEXT NULL,
+    google_token_expires_in INT NULL,
+    google_token_created INT NULL,
     INDEX idx_email (email),
     INDEX idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -23,31 +30,7 @@ CREATE TABLE IF NOT EXISTS categories (
     nama VARCHAR(255) NOT NULL UNIQUE,
     deskripsi TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFA📢 *PENGUMUMAN*
-*PENGUMPULAN LAPORAN FINAL PROJECT*
-
-Diberitahukan kepada seluruh mahasiswa bahwa pengumpulan laporan Final Project (FP) dilaksanakan dengan ketentuan sebagai berikut:
-
-🗓 Deadline Pengumpulan
-*Tanggal 21 Desember 2025*
-Pukul 23.59 WIB
-
-📂 Berkas yang Wajib Dikumpulkan:
-
-1. Video penjelasan aplikasi/sistem
-2. Laporan Final Project
-3. Link GitHub project
-4. Database (DB)
-
-🎥 Ketentuan Video:
-
-1. Durasi maksimal 3 menit
-2. Tidak perlu pembukaan dan perkenalan
-3. Fokus pada penjelasan fitur dan alur system , contoh video  ( https://www.youtube.com/watch?v=6dHmu1GALmA )
-
-⏰ Pengumpulan melewati batas waktu yang ditentukan *tidak akan diterima.*
-
-Demikian pengumuman ini disampaikan. *Harap diperhatikan dan dilaksanakan dengan sebaik-baiknya.*ULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Events Table
 CREATE TABLE IF NOT EXISTS events (
@@ -62,6 +45,10 @@ CREATE TABLE IF NOT EXISTS events (
     created_by INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    latitude DECIMAL(10, 8) NULL,
+    longitude DECIMAL(11, 8) NULL,
+    is_paid BOOLEAN DEFAULT 0,
+    price DECIMAL(10, 2) DEFAULT 0,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_tanggal (tanggal),
     INDEX idx_kategori (kategori),
@@ -75,6 +62,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     event_id INT NOT NULL,
     daftar_waktu DATETIME DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(50) DEFAULT 'confirmed',
+    payment_proof VARCHAR(255) NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
     UNIQUE KEY unique_registration (user_id, event_id),
@@ -91,6 +79,8 @@ CREATE TABLE IF NOT EXISTS notifications (
     message TEXT NOT NULL,
     status VARCHAR(50) DEFAULT 'pending',
     sent_time DATETIME NULL,
+    is_read BOOLEAN DEFAULT 0,
+    read_at DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,

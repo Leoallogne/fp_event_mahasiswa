@@ -2,69 +2,76 @@
 
 require_once __DIR__ . '/../config/database.php';
 
-class ApiClientCalendar {
+class ApiClientCalendar
+{
     private $db;
     private $apiKey;
     private $clientId;
     private $clientSecret;
     private $baseUrl = 'https://www.googleapis.com/calendar/v3';
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $database = new Database();
         $this->db = $database->getConnection();
-        
+
         // Load environment variables
         $envFile = __DIR__ . '/../.env';
         if (file_exists($envFile)) {
             $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
-                if (strpos(trim($line), '#') === 0) continue;
+                if (strpos(trim($line), '#') === 0)
+                    continue;
                 list($key, $value) = explode('=', $line, 2);
                 $_ENV[trim($key)] = trim($value);
             }
         }
-        
+
         $this->apiKey = $_ENV['GOOGLE_CALENDAR_API_KEY'] ?? '';
         $this->clientId = $_ENV['GOOGLE_CALENDAR_CLIENT_ID'] ?? '';
         $this->clientSecret = $_ENV['GOOGLE_CALENDAR_CLIENT_SECRET'] ?? '';
     }
-    
-    public function fetch($calendarId = 'primary', $timeMin = null, $timeMax = null) {
+
+    public function fetch($calendarId = 'primary', $timeMin = null, $timeMax = null)
+    {
         try {
             $url = $this->baseUrl . '/calendars/' . urlencode($calendarId) . '/events';
             $params = ['key' => $this->apiKey];
-            
-            if ($timeMin) $params['timeMin'] = $timeMin;
-            if ($timeMax) $params['timeMax'] = $timeMax;
-            
+
+            if ($timeMin)
+                $params['timeMin'] = $timeMin;
+            if ($timeMax)
+                $params['timeMax'] = $timeMax;
+
             $url .= '?' . http_build_query($params);
-            
+
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            
+
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            
+
             if ($httpCode === 200) {
                 $data = json_decode($response, true);
                 $this->cacheEvents($data['items'] ?? []);
                 return ['success' => true, 'data' => $data];
             }
-            
+
             return ['success' => false, 'message' => 'Failed to fetch calendar events'];
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             error_log("Calendar Fetch Error: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-    
-    public function pushEvent($eventData) {
+
+    public function pushEvent($eventData)
+    {
         try {
             $url = $this->baseUrl . '/calendars/primary/events?key=' . $this->apiKey;
-            
+
             $event = [
                 'summary' => $eventData['title'],
                 'description' => $eventData['deskripsi'] ?? '',
@@ -78,7 +85,7 @@ class ApiClientCalendar {
                     'timeZone' => 'Asia/Jakarta'
                 ]
             ];
-            
+
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_POST, true);
@@ -89,27 +96,28 @@ class ApiClientCalendar {
                 'Authorization: Bearer ' . $this->getAccessToken()
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            
+
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            
+
             if ($httpCode === 200 || $httpCode === 201) {
                 $data = json_decode($response, true);
                 return ['success' => true, 'eventId' => $data['id'] ?? null, 'data' => $data];
             }
-            
+
             return ['success' => false, 'message' => 'Failed to create calendar event'];
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             error_log("Calendar Push Error: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-    
-    public function updateEvent($eventId, $eventData) {
+
+    public function updateEvent($eventId, $eventData)
+    {
         try {
             $url = $this->baseUrl . '/calendars/primary/events/' . urlencode($eventId) . '?key=' . $this->apiKey;
-            
+
             $event = [
                 'summary' => $eventData['title'],
                 'description' => $eventData['deskripsi'] ?? '',
@@ -123,7 +131,7 @@ class ApiClientCalendar {
                     'timeZone' => 'Asia/Jakarta'
                 ]
             ];
-            
+
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -134,26 +142,27 @@ class ApiClientCalendar {
                 'Authorization: Bearer ' . $this->getAccessToken()
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            
+
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            
+
             if ($httpCode === 200) {
                 return ['success' => true, 'data' => json_decode($response, true)];
             }
-            
+
             return ['success' => false, 'message' => 'Failed to update calendar event'];
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             error_log("Calendar Update Error: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-    
-    public function deleteEvent($eventId) {
+
+    public function deleteEvent($eventId)
+    {
         try {
             $url = $this->baseUrl . '/calendars/primary/events/' . urlencode($eventId) . '?key=' . $this->apiKey;
-            
+
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -162,29 +171,30 @@ class ApiClientCalendar {
                 'Authorization: Bearer ' . $this->getAccessToken()
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            
+
             curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            
+
             if ($httpCode === 204 || $httpCode === 200) {
                 return ['success' => true];
             }
-            
+
             return ['success' => false, 'message' => 'Failed to delete calendar event'];
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             error_log("Calendar Delete Error: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-    
-    private function cacheEvents($events) {
+
+    private function cacheEvents($events)
+    {
         try {
             // Store cached events in database
             $stmt = $this->db->prepare("INSERT INTO calendar_cache (event_id, event_data, cached_at) 
                                         VALUES (?, ?, NOW())
                                         ON DUPLICATE KEY UPDATE event_data = ?, cached_at = NOW()");
-            
+
             foreach ($events as $event) {
                 $stmt->execute([
                     $event['id'] ?? '',
@@ -192,15 +202,83 @@ class ApiClientCalendar {
                     json_encode($event)
                 ]);
             }
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             // Table might not exist, ignore
             error_log("Cache Events Error: " . $e->getMessage());
         }
     }
-    
-    private function getAccessToken() {
-        // In a real implementation, you would use OAuth2 flow
-        // For now, return empty or use API key only
+
+    private function getAccessToken()
+    {
+        if (!isset($_SESSION['user']) || !isset($_SESSION['user']['id'])) {
+            return '';
+        }
+
+        $userId = $_SESSION['user']['id'];
+
+        try {
+            $stmt = $this->db->prepare("SELECT google_access_token, google_refresh_token, google_token_expires_in, google_token_created FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch();
+
+            if (!$user || empty($user['google_access_token'])) {
+                return '';
+            }
+
+            // Check if token is expired (giving 60 seconds buffer)
+            if (isset($user['google_token_created']) && isset($user['google_token_expires_in'])) {
+                if ((time() - $user['google_token_created']) >= ($user['google_token_expires_in'] - 60)) {
+                    // Token expired, try to refresh
+                    if (!empty($user['google_refresh_token'])) {
+                        return $this->refreshAccessToken($user['google_refresh_token'], $userId);
+                    }
+                }
+            }
+
+            return $user['google_access_token'];
+        } catch (PDOException $e) {
+            error_log("Get Access Token Error: " . $e->getMessage());
+            return '';
+        }
+    }
+
+    private function refreshAccessToken($refreshToken, $userId)
+    {
+        $tokenUrl = 'https://oauth2.googleapis.com/token';
+        $params = [
+            'client_id' => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'refresh_token' => $refreshToken,
+            'grant_type' => 'refresh_token'
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $tokenUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+
+        if (isset($data['access_token'])) {
+            try {
+                // Update new access token in database
+                $stmt = $this->db->prepare("UPDATE users SET google_access_token = ?, google_token_expires_in = ?, google_token_created = ? WHERE id = ?");
+                $stmt->execute([
+                    $data['access_token'],
+                    $data['expires_in'],
+                    time(),
+                    $userId
+                ]);
+
+                return $data['access_token'];
+            } catch (PDOException $e) {
+                error_log("Update Refreshed Token Error: " . $e->getMessage());
+            }
+        }
+
         return '';
     }
 }

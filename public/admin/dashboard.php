@@ -1,9 +1,9 @@
 <?php
-session_start();
+
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/session.php';
 require_once __DIR__ . '/../../modules/users/Auth.php';
-require_once __DIR__ . '/../../analytics/AnalyticsService.php';
+require_once __DIR__ . '/../../modules/analytics/AnalyticsService.php';
 
 $auth = new Auth();
 $auth->requireAdmin();
@@ -13,6 +13,7 @@ $stats = $analytics->getEventStats();
 $monthlyTrend = $analytics->trenJumlahEventBulanan(12);
 $categoryStats = $analytics->hitungKategoriEventTerbanyakPeminat();
 $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
+$userTrend = $analytics->getUserRegistrationTrend(6); // New: User registration trend
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -25,83 +26,8 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #4e79a7, #2c5282);
-            --success-gradient: linear-gradient(135deg, #00b09b, #96c93d);
-            --info-gradient: linear-gradient(135deg, #11998e, #38ef7d);
-            --warning-gradient: linear-gradient(135deg, #f2994a, #f2c94c);
-            --bg-gradient: linear-gradient(135deg, #e0f7fa, #e0f2f1);
-        }
-
-        body {
-            background: var(--bg-gradient);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            transition: margin-left 0.3s ease;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stat-card {
-            color: white;
-            border: none;
-        }
-
-        .bg-gradient-primary {
-            background: var(--primary-gradient);
-        }
-
-        .bg-gradient-success {
-            background: var(--success-gradient);
-        }
-
-        .bg-gradient-info {
-            background: var(--info-gradient);
-        }
-
-        .bg-gradient-warning {
-            background: var(--warning-gradient);
-        }
-
-        .hero-banner {
-            background: linear-gradient(135deg, #ffffff, #f0f7ff);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .card-header {
-            background: transparent;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            font-weight: 600;
-            color: #2c3e50;
-            padding: 1rem 1.25rem;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0 !important;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/admin-modern.css">
 </head>
 
 <body>
@@ -110,16 +36,24 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
     <div class="main-content">
         <div class="container-fluid">
             <!-- Hero Banner -->
-            <div class="hero-banner">
-                <h2 class="fw-bold mb-2" style="color: #2c3e50;"><i class="bi bi-speedometer2"></i> Dashboard Overview
-                </h2>
-                <p class="text-muted mb-0">Ringkasan aktivitas dan performa sistem event management Anda.</p>
+            <div class="hero-banner glass-card mb-4 p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="fw-bold mb-1" style="color: var(--text-primary);"><i
+                                class="bi bi-rhombus-fill text-primary me-2"></i>Dashboard</h2>
+                        <p class="text-secondary mb-0">Ringkasan aktivitas dan performa sistem.</p>
+                    </div>
+                    <div>
+                        <a href="export-csv.php" class="btn btn-success rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export Laporan
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <!-- Stats Cards -->
             <div class="row mb-4 g-3">
                 <div class="col-md">
-                    <div class="card stat-card bg-gradient-primary h-100">
+                    <div class="card stat-card h-100" style="background: var(--primary-gradient);">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-title mb-0 opacity-75">Total Event</h6>
@@ -130,7 +64,8 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                     </div>
                 </div>
                 <div class="col-md">
-                    <div class="card stat-card bg-gradient-success h-100">
+                    <div class="card stat-card h-100"
+                        style="background: linear-gradient(135deg, #00b74a 0%, #00a846 100%);">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-title mb-0 opacity-75">Pendaftaran</h6>
@@ -141,8 +76,7 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                     </div>
                 </div>
                 <div class="col-md">
-                    <div class="card stat-card bg-gradient-warning h-100"
-                        style="background: linear-gradient(135deg, #f2994a, #f2c94c);">
+                    <div class="card stat-card h-100" style="background: linear-gradient(135deg, #f2994a, #f2c94c);">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-title mb-0 opacity-75">Estimasi Pendapatan</h6>
@@ -154,7 +88,7 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                     </div>
                 </div>
                 <div class="col-md">
-                    <div class="card stat-card bg-gradient-info h-100">
+                    <div class="card stat-card h-100" style="background: var(--info-gradient);">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-title mb-0 opacity-75">Total User</h6>
@@ -165,8 +99,7 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                     </div>
                 </div>
                 <div class="col-md">
-                    <div class="card stat-card bg-gradient-warning h-100"
-                        style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <div class="card stat-card h-100" style="background: linear-gradient(135deg, #667eea, #764ba2);">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="card-title mb-0 opacity-75">Event Mendatang</h6>
@@ -178,25 +111,40 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card">
+            <!-- Charts Row - 3 Charts -->
+            <div class="row mb-4 g-3">
+                <!-- Chart 1: User Registration Trend -->
+                <div class="col-lg-4">
+                    <div class="glass-card h-100">
                         <div class="card-header">
-                            <h5>Tren Event Bulanan</h5>
+                            <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Tren Pendaftaran User</h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="monthlyTrendChart"></canvas>
+                            <canvas id="userTrendChart" style="max-height: 300px;"></canvas>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card">
+
+                <!-- Chart 2: Monthly Event Trend -->
+                <div class="col-lg-4">
+                    <div class="glass-card h-100">
                         <div class="card-header">
-                            <h5>Peserta per Kategori</h5>
+                            <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Tren Event Bulanan</h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="categoryChart"></canvas>
+                            <canvas id="monthlyTrendChart" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Category Participation -->
+                <div class="col-lg-4">
+                    <div class="glass-card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Peserta per Kategori</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="categoryChart" style="max-height: 300px;"></canvas>
                         </div>
                     </div>
                 </div>
@@ -206,7 +154,7 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
             <?php if ($avgParticipants): ?>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card">
+                        <div class="glass-card">
                             <div class="card-body">
                                 <h5>Statistik Rata-rata</h5>
                                 <p>Rata-rata peserta per event: <strong><?= $avgParticipants['rata_rata'] ?? 0 ?></strong>
@@ -222,6 +170,40 @@ $avgParticipants = $analytics->hitungRataRataPesertaPerEvent();
     </div>
 
     <script>
+        // User Registration Trend Chart
+        const userTrendData = <?= json_encode($userTrend) ?>;
+        const userLabels = userTrendData.map(item => item.month);
+        const userValues = userTrendData.map(item => parseInt(item.user_count));
+
+        new Chart(document.getElementById('userTrendChart'), {
+            type: 'line',
+            data: {
+                labels: userLabels,
+                datasets: [{
+                    label: 'Pendaftaran User',
+                    data: userValues,
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+
         // Monthly Trend Chart
         const monthlyData = <?= json_encode($monthlyTrend) ?>;
         const monthlyLabels = monthlyData.map(item => item.bulan);
