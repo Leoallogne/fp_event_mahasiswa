@@ -21,7 +21,7 @@ jobs:
       - name: 📦 Install Dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # 1. Deploy Backend (Core System) -> event_app_core folder
+      # 1. Deploy Backend (Core System) -> ROOT folder (matches your screenshot)
       # We upload: config, modules, vendor, templates, composer.json
       - name: 📂 Sync Backend Files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -29,15 +29,16 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Upload these folders
-          server-dir: ./event_app_core/
+          # Upload directly to ROOT because your screenshot shows config/modules are there
+          server-dir: ./
           local-dir: ./
-          # ONLY upload backend stuff, exclude public and git files
+          # CAUTION: Exclude 'public_html' so we don't delete the website folder!
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             public/**
+            public_html/**
             deploy/**
             docs/**
             README.md
