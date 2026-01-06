@@ -34,11 +34,13 @@ jobs:
           # Increase timeout to 10 minutes (600000ms)
           timeout: 600000
           
-          # FORCE FRESH START (New Identity)
-          state-name: .deploy-state-v3.json
+          # FORCE FRESH START (New Identity V4)
+          state-name: .deploy-state-v4.json
           
-          # Deploy ROOT project to public_html folder
-          server-dir: ./public_html/
+          # Deploy to CURRENT FTP DIRECTORY (Safest bet)
+          # If FTP is already in public_html, this lands files correctly.
+          # If FTP is in root, files land in root (visible).
+          server-dir: ./
           local-dir: ./
           
           # EXCLUDE RULES (CRITICAL)
