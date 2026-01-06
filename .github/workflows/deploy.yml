@@ -31,6 +31,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           # Increase timeout to 10 minutes (600000ms) for heavy uploads
           timeout: 600000
+          # FORCE FRESH START: Use a new state file name to ignore old ghost files
+          state-name: .deploy-state-v2.json
           # Upload directly to ROOT because your screenshot shows config/modules are there
           server-dir: ./
           local-dir: ./
@@ -58,5 +60,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           # Increase timeout to 10 minutes (600000ms)
           timeout: 600000
+          # FORCE FRESH START
+          state-name: .deploy-state-v2.json
           server-dir: ./public_html/
           local-dir: ./public/
