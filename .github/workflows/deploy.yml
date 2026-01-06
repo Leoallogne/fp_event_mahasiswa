@@ -29,6 +29,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          # Increase timeout to 10 minutes (600000ms) for heavy uploads
+          timeout: 600000
           # Upload directly to ROOT because your screenshot shows config/modules are there
           server-dir: ./
           local-dir: ./
@@ -54,5 +56,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          # Increase timeout to 10 minutes (600000ms)
+          timeout: 600000
           server-dir: ./public_html/
           local-dir: ./public/
