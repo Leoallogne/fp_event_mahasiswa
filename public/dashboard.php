@@ -343,7 +343,7 @@ foreach ($categoryData as $data) {
                                                 <?php endif; ?>
                                             </div>
                                             <p class="text-secondary small mb-1 lh-sm">
-                                                <?= htmlspecialchars($notification['message'] ?? '') ?>
+                                                <?= $notification['message'] ?? '' ?>
                                             </p>
                                             <small class="text-muted" style="font-size: 0.75rem;">
                                                 <i
