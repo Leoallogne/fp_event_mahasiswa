@@ -24,3 +24,4 @@ logs/
 tmp/
 temp/
 
+DEPLOY_SECRETS.md
