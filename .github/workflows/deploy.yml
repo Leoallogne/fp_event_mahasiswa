@@ -7,7 +7,7 @@ on:
 
 jobs:
   web-deploy:
-    name: 🎉 Deploy
+    name: 🎉 Deploy Everything
     runs-on: ubuntu-latest
     steps:
       - name: 🚚 Get latest code
@@ -21,46 +21,38 @@ jobs:
       - name: 📦 Install Dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      # 1. Deploy Backend (Core System) -> ROOT folder (matches your screenshot)
-      # We upload: config, modules, vendor, templates, composer.json
-      - name: 📂 Sync Backend Files
+      # STRATEGY: Deploy EVERYTHING to public_html
+      # This ensures all files (config, modules, public) are available.
+      # The root index.php will redirect traffic to public/landing.php
+      - name: � Sync All Files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Increase timeout to 10 minutes (600000ms) for heavy uploads
+          
+          # Increase timeout to 10 minutes (600000ms)
           timeout: 600000
-          # FORCE FRESH START: Use a new state file name to ignore old ghost files
-          state-name: .deploy-state-v2.json
-          # Upload directly to ROOT because your screenshot shows config/modules are there
-          server-dir: ./
+          
+          # FORCE FRESH START (New Identity)
+          state-name: .deploy-state-v3.json
+          
+          # Deploy ROOT project to public_html folder
+          server-dir: ./public_html/
           local-dir: ./
-          # CAUTION: Exclude 'public_html' so we don't delete the website folder!
+          
+          # EXCLUDE RULES (CRITICAL)
+          # 1. We MUST exclude .env so we don't delete the one on server
+          # 2. Exclude git & dev files
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
-            public/**
-            public_html/**
             deploy/**
             docs/**
             README.md
-            .env.example
+            DEPLOY_SECRETS.md
             .gitignore
+            .env
+            .env.example
             database/**
-            
-      # 2. Deploy Frontend (Public) -> public_html folder
-      # We upload the CONTENTS of /public to public_html
-      - name: 🌐 Sync Frontend Files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          # Increase timeout to 10 minutes (600000ms)
-          timeout: 600000
-          # FORCE FRESH START
-          state-name: .deploy-state-v2.json
-          server-dir: ./public_html/
-          local-dir: ./public/
