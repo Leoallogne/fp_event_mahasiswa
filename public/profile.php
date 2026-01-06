@@ -72,6 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Update session
                         Session::set('user_nama', $nama);
                         Session::set('user_email', $email);
+                        Session::set('user_avatar', $avatarFileName); // Update avatar in session
+
                         $currentUser['nama'] = $nama;
                         $currentUser['email'] = $email;
                         $currentUser['avatar'] = $avatarFileName;
@@ -141,6 +143,7 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -151,12 +154,6 @@ try {
             background-color: #f3f4f6;
             font-family: var(--font-inter);
             color: #1f2937;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 0;
-            min-height: 100vh;
         }
 
         /* Hero Profile Section */
@@ -426,22 +423,31 @@ try {
         }
 
         .btn-outline-secondary {
-            border: 1px solid #d1d5db;
-            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            background: #fff;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .btn-outline-secondary:hover {
             background: #f9fafb;
-            border-color: #9ca3af;
+            border-color: #d1d5db;
+            color: #374151;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar-upload-wrapper:hover .avatar-preview {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            transition: all 0.3s ease;
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-            }
+
 
             .profile-hero {
                 padding: 2rem 1rem 6rem;
@@ -695,7 +701,22 @@ try {
                                         $stmt = $db->prepare("SELECT created_at FROM users WHERE id = ?");
                                         $stmt->execute([$currentUser['id']]);
                                         $userData = $stmt->fetch();
-                                        echo date('d F Y', strtotime($userData['created_at'] ?? 'now'));
+                                        $months = [
+                                            'January' => 'Januari',
+                                            'February' => 'Februari',
+                                            'March' => 'Maret',
+                                            'April' => 'April',
+                                            'May' => 'Mei',
+                                            'June' => 'Juni',
+                                            'July' => 'Juli',
+                                            'August' => 'Agustus',
+                                            'September' => 'September',
+                                            'October' => 'Oktober',
+                                            'November' => 'November',
+                                            'December' => 'Desember'
+                                        ];
+                                        $dateStr = date('d F Y', strtotime($userData['created_at'] ?? 'now'));
+                                        echo strtr($dateStr, $months);
                                     } catch (PDOException $e) {
                                         echo '-';
                                     }
@@ -729,10 +750,7 @@ try {
             }
         }
 
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
-        }
+
     </script>
 </body>
 

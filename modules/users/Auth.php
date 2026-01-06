@@ -51,7 +51,7 @@ class Auth
     public function login($email, $password)
     {
         try {
-            $stmt = $this->db->prepare("SELECT id, nama, email, password, role FROM users WHERE email = ?");
+            $stmt = $this->db->prepare("SELECT id, nama, email, password, role, avatar FROM users WHERE email = ?");
             $stmt->execute([$email]);
             $user = $stmt->fetch();
 
@@ -61,6 +61,7 @@ class Auth
                 Session::set('user_id', $user['id']);
                 Session::set('user_nama', $user['nama']);
                 Session::set('user_email', $user['email']);
+                Session::set('user_avatar', $user['avatar'] ?? null); // Store avatar
                 Session::set('user_role', $user['role']);
                 Session::set('logged_in', true);
 
@@ -136,6 +137,7 @@ class Auth
             'id' => Session::get('user_id'),
             'nama' => Session::get('user_nama'),
             'email' => Session::get('user_email'),
+            'avatar' => Session::get('user_avatar'), // Return avatar
             'role' => Session::get('user_role')
         ];
     }

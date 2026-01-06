@@ -18,6 +18,27 @@ class NotificationService
         $database = new Database();
         $this->db = $database->getConnection();
         $this->eventService = new EventService();
+        $this->ensureSchemaUpdated();
+    }
+
+    private function ensureSchemaUpdated()
+    {
+        try {
+            // Ensure event_id is nullable to support global notifications and preserved deletion messages
+            // Check if event_id is already nullable/compatible or just force Modify
+            // We'll just run MODIFY, if it's already nullable it's fine (MySQL)
+            // Need to know if we are in strict mode or constraint issues.
+            // Safe way: Query information_schema or just try/catch
+            try {
+                $this->db->exec("ALTER TABLE notifications MODIFY event_id INT NULL");
+            } catch (PDOException $e) {
+                // Ignore if error (e.g. might already be null or constraint specific syntax)
+                // But typically MODIFY event_id INT NULL works for MySQL
+                error_log("Schema Update Warning: " . $e->getMessage());
+            }
+        } catch (Exception $e) {
+            error_log("Schema Migration Error: " . $e->getMessage());
+        }
     }
 
     public function createNotification($userId, $eventId, $message, $type = 'reminder')

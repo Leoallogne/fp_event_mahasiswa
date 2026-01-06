@@ -43,57 +43,64 @@ class RegistrationService
     public function registerForEvent($userId, $eventId)
     {
         try {
-            // Check if already registered
+            $this->db->beginTransaction();
+
+            // Check if already registered (Quick check before lock)
             $stmt = $this->db->prepare("SELECT id FROM registrations WHERE user_id = ? AND event_id = ?");
             $stmt->execute([$userId, $eventId]);
             if ($stmt->fetch()) {
+                $this->db->rollBack();
                 return ['success' => false, 'message' => 'Anda sudah terdaftar pada event ini'];
             }
 
-            // Check quota
-            // Check quota using subquery for accuracy and performance
-            $stmt = $this->db->prepare("SELECT kuota, 
+            // Lock the event row and get current details
+            // FOR UPDATE protects against concurrent quota reads
+            $stmt = $this->db->prepare("SELECT kuota, price,
                                         (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id AND r.status = 'confirmed') as registered_count
                                         FROM events e
-                                        WHERE e.id = ?");
+                                        WHERE e.id = ?
+                                        FOR UPDATE");
             $stmt->execute([$eventId]);
             $event = $stmt->fetch();
 
             if (!$event) {
+                $this->db->rollBack();
                 return ['success' => false, 'message' => 'Event tidak ditemukan'];
             }
 
             if ($event['registered_count'] >= $event['kuota']) {
+                $this->db->rollBack();
                 return ['success' => false, 'message' => 'Kuota event sudah penuh'];
             }
 
-            // Get event details to check price
-            $stmt = $this->db->prepare("SELECT price FROM events WHERE id = ?");
-            $stmt->execute([$eventId]);
-            $eventData = $stmt->fetch();
-            $isPaidEvent = (!empty($eventData['price']) && $eventData['price'] > 0);
+            $isPaidEvent = (!empty($event['price']) && $event['price'] > 0);
             $initialStatus = $isPaidEvent ? 'pending' : 'confirmed';
 
             // Register
-            // Register
-            // Use INSERT IGNORE or try-catch for unique constraint
             try {
                 $stmt = $this->db->prepare("INSERT INTO registrations (user_id, event_id, status) VALUES (?, ?, ?)");
                 $stmt->execute([$userId, $eventId, $initialStatus]);
             } catch (PDOException $e) {
                 if ($e->getCode() == 23000) { // Duplicate entry
+                    $this->db->rollBack();
                     return ['success' => false, 'message' => 'Anda sudah terdaftar pada event ini'];
                 }
+                $this->db->rollBack();
                 throw $e;
             }
 
-            // Create notification for successful registration
+            $this->db->commit();
+
+            // Create notification for successful registration (After commit)
             require_once __DIR__ . '/../notifications/NotificationService.php';
             $notificationService = new NotificationService();
             $notificationService->createRegistrationNotification($userId, $eventId);
 
             return ['success' => true, 'message' => 'Pendaftaran berhasil'];
         } catch (PDOException $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             error_log("Registration Error: " . $e->getMessage());
             return ['success' => false, 'message' => 'Gagal mendaftar event'];
         }

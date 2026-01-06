@@ -123,6 +123,29 @@ class EventService
     public function deleteEvent($id)
     {
         try {
+            // Get event details before deletion for notification
+            $stmt = $this->db->prepare("SELECT title FROM events WHERE id = ?");
+            $stmt->execute([$id]);
+            $event = $stmt->fetch();
+
+            if ($event) {
+                // Get confirmed participants
+                $stmt = $this->db->prepare("SELECT user_id FROM registrations WHERE event_id = ? AND status = 'confirmed'");
+                $stmt->execute([$id]);
+                $participants = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                if (!empty($participants)) {
+                    require_once __DIR__ . '/../notifications/NotificationService.php';
+                    $notificationService = new NotificationService();
+                    $message = "⚠️ <strong>Event Dibatalkan</strong><br>Mohon maaf, event <strong>{$event['title']}</strong> yang Anda ikuti telah dibatalkan oleh penyelenggara.";
+
+                    foreach ($participants as $userId) {
+                        // Pass null as event_id so notification persists after event deletion
+                        $notificationService->createNotification($userId, null, $message, 'info');
+                    }
+                }
+            }
+
             $stmt = $this->db->prepare("DELETE FROM events WHERE id = ?");
             $stmt->execute([$id]);
 

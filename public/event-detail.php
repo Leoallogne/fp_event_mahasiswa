@@ -33,826 +33,310 @@ $error = $_GET['error'] ?? '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($event['title']) ?> - EventKu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Premium Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/responsive.css?v=1">
+
     <?php if ($event['latitude'] && $event['longitude']): ?>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+        <link rel='stylesheet'
+            href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' />
     <?php endif; ?>
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --font-inter: 'Inter', sans-serif;
-        }
 
-        body {
-            background-color: #f3f4f6;
-            font-family: var(--font-inter);
-            color: #1f2937;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 0;
-            /* Remove padding to allow hero to be full width */
-            transition: all 0.3s ease;
-        }
-
-        /* Hero Wrapper */
-        .event-hero {
-            background: var(--primary-gradient);
-            padding: 4rem 2rem 6rem;
-            /* Extra padding bottom for overlap */
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .event-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .hero-badges .badge {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-
-        .event-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 1rem;
-            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .content-container {
-            max-width: 1200px;
-            margin: -4rem auto 2rem;
-            /* Negative margin to pull up */
-            padding: 0 2rem;
-            position: relative;
-            z-index: 3;
-        }
-
-        .content-card {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid rgba(229, 231, 235, 0.5);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .sticky-sidebar {
-            position: sticky;
-            top: 2rem;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 1.25rem;
-        }
-
-        .info-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: #f3f4f6;
-            color: #4f46e5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1rem;
-            flex-shrink: 0;
-            font-size: 1.25rem;
-        }
-
-        .info-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            color: #6b7280;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
-        }
-
-        .info-value {
-            font-weight: 600;
-            color: #111827;
-            line-height: 1.4;
-        }
-
-        .map-section {
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        #map {
-            height: 400px;
-            width: 100%;
-            z-index: 1;
-        }
-
-        .btn-action-lg {
-            padding: 0.8rem 1.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-
-        .btn-action-lg:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-            }
-
-            .event-hero {
-                padding: 3rem 1.5rem 5rem;
-            }
-
-            .content-container {
-                padding: 0 1rem;
-                margin-top: -3rem;
-            }
-
-            .event-title {
-                font-size: 1.75rem;
-            }
-
-            .sticky-sidebar {
-                position: static;
-            }
-        }
-
-        /* Keep existing map styles */
-        .leaflet-popup-content {
-            margin: 10px 15px;
-            line-height: 1.4;
-        }
-
-        .leaflet-popup-content h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.1em;
-            color: #2c3e50;
-        }
-
-        .leaflet-popup-content p {
-            margin: 5px 0;
-            color: #34495e;
-        }
-
-        .map-container {
-            position: relative;
-        }
-
-        .map-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 5px;
-            border-radius: 4px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-map {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            margin: 2px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-map:hover {
-            background: #f1f3f5;
-            transform: scale(1.05);
-        }
-
-        .loading-spinner {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1001;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .loading-spinner.show {
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/responsive.css?v=1">
+    <link rel="stylesheet" href="assets/css/layout.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="assets/css/app.css?v=<?= time() ?>">
 </head>
 
 <body>
     <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
-        <!-- Hero Header -->
+        <!-- HERO SECTION -->
         <div class="event-hero">
-            <div class="hero-content">
-                <a href="index.php"
-                    class="text-white text-decoration-none mb-4 d-inline-block opacity-75 hover-opacity-100">
-                    <i class="bi bi-arrow-left me-2"></i>Kembali ke Jelajahi
-                </a>
+            <div class="hero-layout">
+                <div class="back-nav">
+                    <a href="index.php"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Event</a>
+                </div>
 
-                <div class="hero-badges mb-3 d-flex gap-2">
-                    <span class="badge rounded-pill text-uppercase">
-                        <i class="bi bi-tag-fill me-1"></i><?= htmlspecialchars($event['kategori']) ?>
-                    </span>
+                <div class="hero-tags">
+                    <div class="hero-tag">
+                        <i class="bi bi-tag-fill me-1"></i> <?= htmlspecialchars($event['kategori']) ?>
+                    </div>
                     <?php if (!empty($event['price']) && $event['price'] > 0): ?>
-                        <span class="badge rounded-pill bg-warning text-dark border-0">
-                            Premium
-                        </span>
-                    <?php else: ?>
-                        <span class="badge rounded-pill bg-success border-0">
-                            Gratis
-                        </span>
+                        <div class="hero-tag premium">
+                            <i class="bi bi-star-fill me-1"></i> Premium
+                        </div>
                     <?php endif; ?>
                 </div>
 
-                <h1 class="event-title"><?= htmlspecialchars($event['title']) ?></h1>
+                <div class="hero-title-wrapper">
+                    <h1><?= htmlspecialchars($event['title']) ?></h1>
+                </div>
 
-                <div class="d-flex align-items-center text-white opacity-90 gap-4 flex-wrap">
-                    <span><i
-                            class="bi bi-calendar-event me-2"></i><?= date('d F Y', strtotime($event['tanggal'])) ?></span>
-                    <span><i class="bi bi-clock me-2"></i><?= date('H:i', strtotime($event['tanggal'])) ?> WIB</span>
-                    <span><i class="bi bi-geo-alt me-2"></i><?= htmlspecialchars($event['lokasi']) ?></span>
+                <div class="info-grid">
+                    <div class="info-cell">
+                        <label><i class="bi bi-calendar4 me-1"></i> Tanggal</label>
+                        <div class="val"><?= date('d F Y', strtotime($event['tanggal'])) ?></div>
+                    </div>
+                    <div class="info-cell">
+                        <label><i class="bi bi-clock me-1"></i> Waktu</label>
+                        <div class="val"><?= date('H:i', strtotime($event['tanggal'])) ?> WIB - Selesai</div>
+                    </div>
+                    <div class="info-cell">
+                        <label><i class="bi bi-geo-alt me-1"></i> Lokasi</label>
+                        <div class="val"><?= htmlspecialchars($event['lokasi']) ?></div>
+                    </div>
+                    <div class="info-cell">
+                        <label><i class="bi bi-person-fill"></i> Penyelenggara</label>
+                        <div class="val text-truncate" style="font-size: 1rem;">
+                            <?= htmlspecialchars($event['creator_name'] ?? 'Panitia Event') ?>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Content -->
+        <!-- CONTENT SECTION -->
         <div class="content-container">
-            <?php if ($success): ?>
-                <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm border-0">
-                    <i class="bi bi-check-circle-fill me-2"></i> Pendaftaran berhasil! Silakan cek email Anda.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+            <!-- Left Column: Details -->
+            <div class="main-column">
 
-            <?php if ($error): ?>
-                <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm border-0">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= htmlspecialchars($error) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+                <!-- Alert Messages -->
+                <?php if ($success): ?>
+                    <div class="alert alert-success d-flex align-items-center rounded-3 mb-4 shadow-sm border-0">
+                        <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                        <div>
+                            <div class="fw-bold">Registrasi Berhasil!</div>
+                            <?= ($success == '1') ? 'Pembayaran terkonfirmasi.' : 'Selamat bergabung di event ini.' ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
-            <div class="row g-4">
-                <!-- Left Column -->
-                <div class="col-lg-8">
-                    <div class="content-card">
-                        <h4 class="fw-bold mb-4">Tentang Event</h4>
-                        <p class="text-secondary lh-lg mb-0" style="white-space: pre-line;">
-                            <?= htmlspecialchars($event['deskripsi']) ?>
-                        </p>
+                <!-- Description Card -->
+                <div class="section-card primary-border">
+                    <h3 class="section-title"><i class="bi bi-file-text"></i> Deskripsi Event</h3>
+                    <div class="description-text">
+                        <?= nl2br(htmlspecialchars($event['deskripsi'])) ?>
                     </div>
 
-                    <?php if ($event['latitude'] && $event['longitude']): ?>
-                        <div class="content-card p-0 overflow-hidden">
-                            <div class="p-4 border-bottom bg-light">
-                                <h5 class="fw-bold mb-0"><i class="bi bi-map me-2 text-primary"></i>Lokasi Acara</h5>
+                    <div class="mt-4 pt-4 border-top">
+                        <h5 class="fw-bold mb-3 small text-uppercase text-muted">Fasilitas Peserta</h5>
+                        <div class="facilities-grid">
+                            <div class="facility-item">
+                                <i class="bi bi-wifi"></i>
+                                <span>Akses Internet / Wifi</span>
                             </div>
-                            <div class="map-container">
-                                <div id="map"></div>
-                                <div class="map-controls">
-                                    <button id="zoom-in" class="btn-map" title="Perbesar"><i
-                                            class="bi bi-plus"></i></button>
-                                    <button id="zoom-out" class="btn-map" title="Perkecil"><i
-                                            class="bi bi-dash"></i></button>
-                                    <button id="locate-me" class="btn-map" title="Lokasi Saya"><i
-                                            class="bi bi-geo"></i></button>
-                                </div>
+                            <div class="facility-item">
+                                <i class="bi bi-cup-hot"></i>
+                                <span>Snack & Minuman</span>
                             </div>
-                            <div class="p-3 bg-light text-center">
-                                <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $event['latitude'] ?>,<?= $event['longitude'] ?>"
-                                    target="_blank" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-box-arrow-up-right me-1"></i> Buka di Google Maps
-                                </a>
+                            <div class="facility-item">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                                <span>E-Sertifikat</span>
                             </div>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Right Column (Sticky) -->
-                <div class="col-lg-4">
-                    <div class="sticky-sidebar">
-                        <div class="content-card border-top-0 border-start-0 border-end-0 border-4 border-primary">
-                            <h5 class="fw-bold mb-4">Detail Pendaftaran</h5>
-
-                            <div class="info-item">
-                                <div class="info-icon"><i class="bi bi-ticket-perforated"></i></div>
-                                <div>
-                                    <div class="info-label">Harga Tiket</div>
-                                    <div class="info-value fs-5 text-primary">
-                                        <?php if (!empty($event['price']) && $event['price'] > 0): ?>
-                                            Rp <?= number_format($event['price'], 0, ',', '.') ?>
-                                        <?php else: ?>
-                                            Gratis
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
+                            <div class="facility-item">
+                                <i class="bi bi-people"></i>
+                                <span>Networking</span>
                             </div>
-
-                            <div class="info-item">
-                                <div class="info-icon"><i class="bi bi-people"></i></div>
-                                <div>
-                                    <div class="info-label">Sisa Kuota</div>
-                                    <div class="info-value">
-                                        <?= $availableQuota ?> / <?= $event['kuota'] ?> Kursi
-                                        <?php if ($availableQuota <= 5 && $availableQuota > 0): ?>
-                                            <span class="text-danger small ms-1">(Terbatas!)</span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr class="my-4">
-
-                            <?php if (!$auth->isLoggedIn()): ?>
-                                <div class="text-center">
-                                    <p class="small text-muted mb-3">Login untuk mendaftar event ini</p>
-                                    <a href="login.php" class="btn btn-primary btn-action-lg w-100">Login Sekarang</a>
-                                </div>
-                            <?php elseif ($isRegistered): ?>
-                                <div
-                                    class="alert alert-success border-0 bg-success bg-opacity-10 text-success text-center mb-3">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Anda Terdaftar
-                                </div>
-                                <a href="cancel-registration.php?id=<?= $eventId ?>"
-                                    class="btn btn-outline-danger w-100 mb-2"
-                                    onclick="return confirm('Yakin ingin membatalkan pendaftaran?')">
-                                    Batalkan Pendaftaran
-                                </a>
-                            <?php elseif ($availableQuota <= 0): ?>
-                                <button class="btn btn-secondary btn-action-lg w-100 disabled" disabled>
-                                    Kuota Penuh
-                                </button>
-                            <?php else: ?>
-                                <a href="register-event.php?id=<?= $eventId ?>"
-                                    class="btn btn-primary btn-action-lg w-100 shadow-lg">
-                                    Daftar Sekarang
-                                </a>
-                            <?php endif; ?>
-
-                            <div class="mt-3">
-                                <a href="export-calendar.php?id=<?= $eventId ?>"
-                                    class="btn btn-light text-muted w-100 btn-sm">
-                                    <i class="bi bi-calendar-plus me-1"></i> Simpan ke Kalender
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-3 text-muted small">
-                            Butuh bantuan? <a href="#" class="text-decoration-none">Hubungi Panitia</a>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <?php if ($event['latitude'] && $event['longitude']): ?>
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-            <script>
-                // Custom marker icons
-                const eventIcon = L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                    shadowSize: [41, 41]
-                });
+                <!-- Terms Card -->
+                <div class="section-card info-border">
+                    <h3 class="section-title"><i class="bi bi-info-circle"></i> Syarat & Ketentuan</h3>
+                    <ul class="mb-0 ps-3 text-secondary lh-lg">
+                        <li>Peserta wajib hadir 15 menit sebelum acara dimulai.</li>
+                        <li>Membawa kartu identitas (KTM/KTP) untuk registrasi ulang.</li>
+                        <li>Dilarang membawa senjata tajam atau benda berbahaya.</li>
+                        <li>Tiket yang sudah dibeli/diklaim tidak dapat dipindahtangankan tanpa konfirmasi panitia.</li>
+                        <li>Jagalah kebersihan dan ketertiban selama acara berlangsung.</li>
+                    </ul>
+                </div>
 
-                const userIcon = L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                    shadowSize: [41, 41]
-                });
-
-                // Add loading spinner element
-                const mapContainer = document.querySelector('.map-container');
-                const loadingSpinner = document.createElement('div');
-                loadingSpinner.className = 'loading-spinner';
-                loadingSpinner.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <span class="ms-2">Mengambil lokasi...</span>
-                    </div>
-                `;
-                mapContainer.appendChild(loadingSpinner);
-
-                // Show loading state
-                const showLoading = (show) => {
-                    loadingSpinner.classList.toggle('show', show);
-                };
-
-                document.addEventListener('DOMContentLoaded', function () {
-                    const lat = <?= $event['latitude'] ?>;
-                    const lng = <?= $event['longitude'] ?>;
-                    const eventTitle = "<?= addslashes(htmlspecialchars($event['title'])) ?>";
-                    const eventLocation = "<?= addslashes(htmlspecialchars($event['lokasi'])) ?>";
-                    const eventDate = new Date('<?= $event['tanggal'] ?>').toLocaleDateString('id-ID', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-
-                    // Initialize map with better options
-                    const map = L.map('map', {
-                        center: [lat, lng],
-                        zoom: 15,
-                        zoomControl: false,
-                        scrollWheelZoom: true
-                    });
-
-                    // Add tile layer with better attribution
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                        maxZoom: 19,
-                        detectRetina: true
-                    }).addTo(map);
-
-                    // Add custom zoom controls
-                    L.control.zoom({
-                        position: 'bottomright'
-                    }).addTo(map);
-
-                    // Add marker with custom popup and animation
-                    const marker = L.marker([lat, lng], {
-                        icon: eventIcon,
-                        title: eventTitle,
-                        riseOnHover: true,
-                        autoPanOnFocus: true
-                    }).addTo(map);
-
-                    // Add bounce animation class to marker
-                    const markerElement = marker.getElement();
-                    if (markerElement) {
-                        markerElement.classList.add('bouncing-marker');
-
-                        // Pause animation on hover
-                        markerElement.addEventListener('mouseenter', () => {
-                            markerElement.style.animationPlayState = 'paused';
-                        });
-
-                        // Resume animation when mouse leaves
-                        markerElement.addEventListener('mouseleave', () => {
-                            markerElement.style.animationPlayState = 'running';
-                        });
-                    }
-
-                    // Custom popup content with more details
-                    const popupContent = `
-                        <div style="min-width: 250px;">
-                            <h5 class="mb-2"><i class="bi bi-geo-alt-fill"></i> ${eventTitle}</h5>
-                            <div class="mb-2">
-                                <div class="d-flex align-items-start">
-                                    <i class="bi bi-geo-alt mt-1 me-2"></i>
-                                    <div>${eventLocation}</div>
-                                </div>
-                                <div class="d-flex align-items-start mt-1">
-                                    <i class="bi bi-calendar-event mt-1 me-2"></i>
-                                    <div>${eventDate}</div>
-                                </div>
-                                <div class="d-flex align-items-start mt-1">
-                                    <i class="bi bi-people mt-1 me-2"></i>
-                                    <div>${<?= $event['registered_count'] ?? 0 ?>} / ${<?= $event['kuota'] ?>} peserta terdaftar</div>
-                                </div>
-                            </div>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" 
-                               target="_blank" class="btn btn-sm btn-primary w-100">
-                                <i class="bi bi-signpost-split"></i> Dapatkan Petunjuk Arah
+                <!-- Map Card -->
+                <?php if ($event['latitude'] && $event['longitude']): ?>
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="bi bi-map"></i> Peta Lokasi</h3>
+                        <p class="text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                            <?= htmlspecialchars($event['lokasi']) ?></p>
+                        <div id="map"></div>
+                        <div class="text-end mt-2">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $event['latitude'] ?>,<?= $event['longitude'] ?>"
+                                target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Buka di Google Maps
                             </a>
                         </div>
-                    `;
+                    </div>
+                <?php endif; ?>
 
-                    marker.bindPopup(popupContent).openPopup();
+            </div>
 
-                    // Add locate control with better options
-                    const locateControl = L.control.locate({
-                        position: 'topleft',
-                        drawCircle: true,
-                        follow: true,
-                        setView: 'untilPanOrZoom',
-                        keepCurrentZoomLevel: true,
-                        markerStyle: {
-                            weight: 1,
-                            opacity: 0.8,
-                            fillOpacity: 0.8
-                        },
-                        circleStyle: {
-                            weight: 1,
-                            clickable: false
-                        },
-                        icon: 'bi bi-geo',
-                        metric: true,
-                        strings: {
-                            title: 'Lokasi Saya',
-                            popup: 'Anda berada dalam radius {distance} {unit} dari lokasi event',
-                            outsideMapBoundsMsg: 'Anda berada di luar area peta yang terlihat',
-                            metersUnit: 'meter',
-                            feetUnit: 'kaki',
-                            popup: 'Anda berada dalam radius {distance} {unit} dari lokasi event',
-                            outsideMapBoundsMsg: 'Anda berada di luar area peta yang terlihat'
-                        },
-                        locateOptions: {
-                            maxZoom: 16,
-                            watch: true,
-                            enableHighAccuracy: true,
-                            maximumAge: 10000,
-                            timeout: 10000
-                        }
-                    }).addTo(map);
+            <!-- Right Column: Sidebar -->
+            <div class="sidebar-column">
+                <div class="sticky-sidebar">
+                    <div class="reg-box">
+                        <!-- Countdown -->
+                        <div class="countdown-box">
+                            <div class="small mb-2 text-warning fw-bold">EVENT DIMULAI DALAM</div>
+                            <div class="countdown-timer" id="countdown">
+                                <div><span id="d">00</span>
+                                    <div class="countdown-label">Hari</div>
+                                </div> :
+                                <div><span id="h">00</span>
+                                    <div class="countdown-label">Jam</div>
+                                </div> :
+                                <div><span id="m">00</span>
+                                    <div class="countdown-label">Menit</div>
+                                </div>
+                            </div>
+                        </div>
 
-                    // Add click event to open directions in new tab
-                    map.on('click', function (e) {
-                        const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-                        window.open(url, '_blank');
-                    });
+                        <div class="text-center mb-4">
+                            <span class="text-uppercase small fw-bold text-muted">Investasi / Tiket</span>
+                            <div class="price-huge">
+                                <?php if (!empty($event['price']) && $event['price'] > 0): ?>
+                                    Rp <?= number_format($event['price'], 0, ',', '.') ?>
+                                <?php else: ?>
+                                    GRATIS
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
-                    // Custom controls with better tooltips and feedback
-                    const zoomInBtn = document.getElementById('zoom-in');
-                    const zoomOutBtn = document.getElementById('zoom-out');
-                    const locateMeBtn = document.getElementById('locate-me');
+                        <!-- Quota -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between small fw-bold mb-1">
+                                <span>Kuota Terisi</span>
+                                <span><?= $event['registered_count'] ?? 0 ?> / <?= $event['kuota'] ?></span>
+                            </div>
+                            <div class="progress" style="height: 10px; border-radius: 10px;">
+                                <?php
+                                $pct = ($event['kuota'] > 0) ? (($event['registered_count'] ?? 0) / $event['kuota']) * 100 : 0;
+                                $cls = ($pct > 90) ? 'bg-danger' : 'bg-primary';
+                                ?>
+                                <div class="progress-bar <?= $cls ?>" style="width: <?= $pct ?>%"></div>
+                            </div>
+                            <?php if ($availableQuota < 5 && $availableQuota > 0): ?>
+                                <div class="text-center small text-danger fw-bold mt-1">Sisa <?= $availableQuota ?> kursi
+                                    lagi!</div>
+                            <?php endif; ?>
+                        </div>
 
-                    // Add tooltips
-                    const tooltips = [
-                        { element: zoomInBtn, text: 'Perbesar' },
-                        { element: zoomOutBtn, text: 'Perkecil' },
-                        { element: locateMeBtn, text: 'Lokasi Saya' }
-                    ];
+                        <!-- Highlights -->
+                        <ul class="benefits-list">
+                            <li><i class="bi bi-check-circle-fill"></i> Materi Eksklusif</li>
+                            <li><i class="bi bi-check-circle-fill"></i> E-Sertifikat Bernama</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Sesi Tanya Jawab</li>
+                        </ul>
 
-                    tooltips.forEach(({ element, text }) => {
-                        const tooltip = document.createElement('div');
-                        tooltip.className = 'tooltip';
-                        tooltip.textContent = text;
-                        tooltip.style.cssText = `
-                            position: absolute;
-                            background: rgba(0, 0, 0, 0.8);
-                            color: white;
-                            padding: 4px 8px;
-                            border-radius: 4px;
-                            font-size: 12px;
-                            white-space: nowrap;
-                            pointer-events: none;
-                            opacity: 0;
-                            transition: opacity 0.2s;
-                            z-index: 1000;
-                            right: 40px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                        `;
+                        <!-- Action Buttons -->
+                        <?php if (!$auth->isLoggedIn()): ?>
+                            <a href="login.php" class="btn btn-primary w-100 py-3 fw-bold rounded-3 mb-2 shadow-sm">Login
+                                untuk Daftar</a>
+                            <div class="text-center small">Belum punya akun? <a href="register.php">Daftar</a></div>
+                        <?php elseif ($isRegistered): ?>
+                            <div class="alert alert-success text-center border-0 small py-2 fw-bold mb-3">
+                                <i class="bi bi-check-circle me-1"></i> Anda Terdaftar
+                            </div>
+                            <a href="export-calendar.php?id=<?= $eventId ?>"
+                                class="btn btn-outline-dark w-100 mb-2 btn-sm fw-bold">
+                                <i class="bi bi-calendar-plus me-1"></i> Add to Calendar
+                            </a>
+                            <a href="cancel-registration.php?id=<?= $eventId ?>"
+                                class="btn btn-link text-danger w-100 btn-sm text-decoration-none"
+                                onclick="return confirm('Batalkan pendaftaran?')">Batalkan Pendaftaran</a>
+                        <?php elseif ($availableQuota <= 0): ?>
+                            <button class="btn btn-secondary w-100 py-3 fw-bold disabled">Kuota Full</button>
+                        <?php else: ?>
+                            <a href="register-event.php?id=<?= $eventId ?>"
+                                class="btn btn-primary w-100 py-3 fw-bold shadow hover-scale">
+                                DAFTAR SEKARANG
+                            </a>
+                        <?php endif; ?>
+                    </div>
 
-                        element.style.position = 'relative';
-                        element.appendChild(tooltip);
+                    <!-- Host Info Small -->
+                    <div class="mt-4 host-card">
+                        <div class="host-avatar">
+                            <?= strtoupper(substr($event['creator_name'] ?? 'P', 0, 1)) ?>
+                        </div>
+                        <div>
+                            <div class="small text-muted text-uppercase">Organized By</div>
+                            <div class="fw-bold"><?= htmlspecialchars($event['creator_name'] ?? 'Panitia Acara') ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                        element.addEventListener('mouseenter', (e) => {
-                            tooltip.style.opacity = '1';
-                        });
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-                        element.addEventListener('mouseleave', () => {
-                            tooltip.style.opacity = '0';
-                        });
-                    });
+    <!-- Countdown Logic -->
+    <script>
+        const eventDate = new Date("<?= date('Y-m-d H:i:s', strtotime($event['tanggal'])) ?>").getTime();
 
-                    // Add click effects
-                    const addClickEffect = (element) => {
-                        element.addEventListener('mousedown', () => {
-                            element.style.transform = 'scale(0.95)';
-                        });
+        const timer = setInterval(function () {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
 
-                        element.addEventListener('mouseup', () => {
-                            element.style.transform = 'scale(1.05)';
-                        });
-
-                        element.addEventListener('mouseleave', () => {
-                            element.style.transform = 'scale(1)';
-                        });
-                    };
-
-                    [zoomInBtn, zoomOutBtn, locateMeBtn].forEach(btn => addClickEffect(btn));
-
-                    // Zoom controls with animation
-                    zoomInBtn.addEventListener('click', function () {
-                        map.zoomIn(1, {
-                            animate: true,
-                            duration: 0.3
-                        });
-                    });
-
-                    zoomOutBtn.addEventListener('click', function () {
-                        map.zoomOut(1, {
-                            animate: true,
-                            duration: 0.3
-                        });
-                    });
-
-                    // Add pulsing effect to locate me button when active
-                    locateMeBtn.addEventListener('click', function () {
-                        // Toggle active state
-                        locateMeBtn.classList.toggle('active');
-
-                        // Add pulsing effect when active
-                        if (locateMeBtn.classList.contains('active')) {
-                            locateMeBtn.style.animation = 'pulse 1.5s infinite';
-                            locateMeBtn.style.boxShadow = '0 0 0 0 rgba(13, 110, 253, 0.7)';
-                        } else {
-                            locateMeBtn.style.animation = '';
-                            locateMeBtn.style.boxShadow = '';
-                        }
-
-                        showLoading(true);
-                        if (navigator.geolocation) {
-                            navigator.geolocation.getCurrentPosition(function (position) {
-                                const userLatLng = [position.coords.latitude, position.coords.longitude];
-
-                                // Add or update user location marker
-                                if (window.userLocationMarker) {
-                                    window.userLocationMarker.setLatLng(userLatLng);
-                                } else {
-                                    window.userLocationMarker = L.marker(userLatLng, {
-                                        icon: userIcon,
-                                        title: 'Lokasi Anda',
-                                        zIndexOffset: 1000
-                                    }).addTo(map);
-
-                                    window.userLocationMarker.bindPopup('<b>Lokasi Anda</b><br>Akurasi: ' +
-                                        Math.round(position.coords.accuracy) + ' meter').openPopup();
-                                }
-
-                                // Center map on user location
-                                map.setView(userLatLng, 15);
-
-                                // Show route from user to event
-                                const userLatLngStr = `${userLatLng[0]},${userLatLng[1]}`;
-                                const eventLatLngStr = `${lat},${lng}`;
-                                const routeUrl = `https://www.google.com/maps/dir/${userLatLngStr}/${eventLatLngStr}`;
-
-                                // Update popup with route info
-                                window.userLocationMarker.setPopupContent(
-                                    `<b>Lokasi Anda</b><br>
-                                    Akurasi: ${Math.round(position.coords.accuracy)} meter<br>
-                                    <a href="${routeUrl}" target="_blank" class="btn btn-sm btn-primary mt-2 w-100">
-                                        <i class="bi bi-signpost-split"></i> Rute ke Event
-                                    </a>`
-                                ).openPopup();
-
-                            }, function (error) {
-                                let errorMessage = 'Tidak dapat mengakses lokasi Anda';
-                                switch (error.code) {
-                                    case error.PERMISSION_DENIED:
-                                        errorMessage = 'Akses lokasi ditolak. Harap aktifkan izin lokasi di pengaturan browser Anda.';
-                                        break;
-                                    case error.POSITION_UNAVAILABLE:
-                                        errorMessage = 'Informasi lokasi tidak tersedia.';
-                                        break;
-                                    case error.TIMEOUT:
-                                        errorMessage = 'Permintaan lokasi melebihi batas waktu.';
-                                        break;
-                                }
-                                // Show error in a more user-friendly way
-                                const errorDiv = document.createElement('div');
-                                errorDiv.className = 'alert alert-warning alert-dismissible fade show position-absolute';
-                                errorDiv.style.top = '10px';
-                                errorDiv.style.left = '50%';
-                                errorDiv.style.transform = 'translateX(-50%)';
-                                errorDiv.style.zIndex = '1000';
-                                errorDiv.style.maxWidth = '90%';
-                                errorDiv.innerHTML = `
-                                    <i class="bi bi-exclamation-triangle-fill"></i> ${errorMessage}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                `;
-
-                                document.body.appendChild(errorDiv);
-
-                                // Auto-remove after 5 seconds
-                                setTimeout(() => {
-                                    errorDiv.remove();
-                                }, 5000);
-                            }, {
-                                enableHighAccuracy: true,
-                                timeout: 10000,
-                                maximumAge: 0
-                            });
-                        } else {
-                            alert('Browser Anda tidak mendukung geolokasi');
-                        }
-                    });
-
-                    // Add scale control with better options
-                    L.control.scale({
-                        imperial: false,
-                        metric: true,
-                        position: 'bottomleft',
-                        maxWidth: 200
-                    }).addTo(map);
-
-                    // Add fullscreen control
-                    L.control.fullscreen({
-                        position: 'topleft',
-                        title: 'Tampilkan layar penuh',
-                        titleCancel: 'Keluar dari layar penuh',
-                        content: '<i class="bi bi-fullscreen"></i>',
-                        forceSeparateButton: true
-                    }).addTo(map);
-
-                    // Add more touch support for mobile devices
-                    map.touchZoom.enable();
-                    map.dragging.enable();
-                    map.scrollWheelZoom.enable();
-
-                    // Add animation to popup when it opens
-                    map.on('popupopen', function (e) {
-                        const popup = e.popup;
-                        const popupElement = popup.getElement();
-                        if (popupElement) {
-                            popupElement.style.opacity = '0';
-                            popupElement.style.transform = 'translateY(10px)';
-                            popupElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-
-                            // Trigger reflow
-                            void popupElement.offsetWidth;
-
-                            popupElement.style.opacity = '1';
-                            popupElement.style.transform = 'translateY(0)';
-                        }
-                    });
-
-                    // Add smooth transition when changing views
-                    map.on('movestart', function () {
-                        map._container.style.transition = 'all 0.3s ease-out';
-                    });
-
-                    map.on('moveend', function () {
-                        map._container.style.transition = '';
-                    });
-
-                    // Handle window resize
-                    let resizeTimer;
-                    window.addEventListener('resize', function () {
-                        clearTimeout(resizeTimer);
-                        resizeTimer = setTimeout(function () {
-                            map.invalidateSize();
-                        }, 250);
-                    });
-                });
-            </script>
-        <?php endif; ?>
-        <script>
-            function toggleSidebar() {
-                const sidebar = document.querySelector('.sidebar');
-                sidebar.classList.toggle('active');
+            if (distance < 0) {
+                clearInterval(timer);
+                document.getElementById("countdown").innerHTML = "<div class='text-danger'>EVENT SELESAI</div>";
+                return;
             }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+            document.getElementById("d").innerHTML = days < 10 ? '0' + days : days;
+            document.getElementById("h").innerHTML = hours < 10 ? '0' + hours : hours;
+            document.getElementById("m").innerHTML = minutes < 10 ? '0' + minutes : minutes;
+        }, 1000);
+    </script>
+
+    <?php if ($event['latitude'] && $event['longitude']): ?>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+        <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const lat = <?= $event['latitude'] ?>;
+                const lng = <?= $event['longitude'] ?>;
+                const map = L.map('map', { scrollWheelZoom: false }).setView([lat, lng], 15);
+
+                // Standard OSM
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Custom Marker
+                const icon = L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
+
+                L.marker([lat, lng], { icon: icon }).addTo(map)
+                    .bindPopup("<b><?= addslashes($event['title']) ?></b><br><?= addslashes($event['lokasi']) ?>").openPopup();
+
+                L.control.locate({ position: 'topright' }).addTo(map);
+                L.control.fullscreen({ position: 'topright' }).addTo(map);
+            });
         </script>
+    <?php endif; ?>
 </body>
 
 </html>

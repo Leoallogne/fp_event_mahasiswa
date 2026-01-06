@@ -47,9 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login - EventKu</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/auth.css?v=3">
+    <link rel="stylesheet" href="assets/css/auth.css?v=4">
 </head>
 
 <body>
@@ -132,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="form-footer">
                         <p>Belum punya akun? <a href="register.php">Daftar di sini</a></p>
-                        <a href="landing.php" class="back-link">
+                        <a href="index.php" class="back-link">
                             <i class="bi bi-arrow-left me-1"></i>Kembali ke halaman utama
                         </a>
                     </div>
