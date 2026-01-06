@@ -131,7 +131,7 @@ foreach ($categoryData as $data) {
                 <div class="col-lg-8">
                     <h1 class="display-6 fw-bold mb-2">Halo, <?= htmlspecialchars($currentUser['nama'] ?? 'User') ?>! 👋
                     </h1>
-                    <p class="mb-0 opacity-90 fs-5">Selamat datang kembali di dashboard event Anda.</p>
+                    <p class="mb-0 opacity-90 fs-5">Selamat datang kembali di dashboard event Anda. ✨</p>
                 </div>
                 <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
                     <a href="index.php" class="btn btn-light text-primary fw-semibold px-4 py-2 shadow-sm">
@@ -343,7 +343,7 @@ foreach ($categoryData as $data) {
                                                 <?php endif; ?>
                                             </div>
                                             <p class="text-secondary small mb-1 lh-sm">
-                                                <?= $notification['message'] ?? '' ?>
+                                                <?= html_entity_decode($notification['message'] ?? '') ?>
                                             </p>
                                             <small class="text-muted" style="font-size: 0.75rem;">
                                                 <i
