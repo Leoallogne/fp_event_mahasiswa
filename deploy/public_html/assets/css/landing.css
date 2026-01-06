@@ -1,0 +1,502 @@
+:root {
+    --primary-color: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary-color: #ec4899;
+    --accent-color: #f59e0b;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --bg-light: #f3f4f6;
+    --bg-white: #ffffff;
+    --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+}
+
+body {
+    background-color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+/* ================= FLOATING GLASS NAVBAR (USER REQUEST) ================= */
+
+/* 1. The Outer Wrapper - Transparent & Spaced */
+.navbar-landing {
+    background: transparent !important;
+    padding: 1.5rem 0;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* 2. The Inner Container - The "Pill" */
+.navbar-landing .container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    /* The round "bundar" shape */
+    padding: 0.75rem 2rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* 3. Scrolled State - "Tightens" but stays floating */
+.navbar-landing.scrolled {
+    padding: 1rem 0;
+}
+
+.navbar-landing.scrolled .container {
+    background: rgba(255, 255, 255, 0.9);
+    /* Becomes more solid */
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* 4. Text & Item Colors (Context Aware) */
+
+/* Default (Guest/Hero) - White Text */
+.navbar-landing .navbar-brand {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.navbar-landing .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+    margin: 0 0.5rem;
+    transition: color 0.3s;
+}
+
+.navbar-landing .nav-link:hover {
+    color: white !important;
+}
+
+.menu-toggle-icon {
+    color: white;
+}
+
+/* Scrolled OR Logged In - Dark Text */
+.navbar-landing.scrolled .navbar-brand,
+.navbar-landing.scrolled .nav-link,
+.navbar-landing.scrolled .menu-toggle-icon,
+.navbar-landing.navbar-logged-in .navbar-brand,
+.navbar-landing.navbar-logged-in .nav-link,
+.navbar-landing.navbar-logged-in .menu-toggle-icon {
+    color: var(--text-main) !important;
+}
+
+.navbar-landing.scrolled .nav-link:hover,
+.navbar-landing.navbar-logged-in .nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Logged In Specific Override */
+/* If logged in, the background should be visible immediately because there is no dark hero */
+.navbar-landing.navbar-logged-in .container {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Buttons */
+.btn-nav-light {
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-nav-light:hover {
+    background: white;
+    color: var(--primary-color);
+}
+
+/* Update buttons in Scrolled/Logged-In state */
+.navbar-landing.scrolled .btn-nav-light,
+.navbar-landing.navbar-logged-in .btn-nav-light {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: transparent;
+}
+
+.navbar-landing.scrolled .btn-nav-light:hover,
+.navbar-landing.navbar-logged-in .btn-nav-light:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Mobile Toggler */
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+/* Mobile Dropdown Fix */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        margin-top: 1rem;
+        background: white;
+        padding: 1rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-landing .nav-link,
+    .navbar-landing.scrolled .nav-link,
+    .navbar-landing.navbar-logged-in .nav-link {
+        color: var(--text-main) !important;
+        padding: 0.5rem 0;
+    }
+}
+
+
+/* ================= REST OF LANDING CSS (Preserving Content) ================= */
+
+/* Main Content - Full Width */
+.main-content {
+    margin-left: 0 !important;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hero Section */
+.hero-wrapper {
+    position: relative;
+    padding: 10rem 2rem 8rem;
+    background: #0f172a;
+    color: white;
+    overflow: hidden;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Stats Section */
+.stats-container {
+    margin-top: -4rem;
+    position: relative;
+    z-index: 20;
+    padding: 0 2rem;
+    margin-bottom: 4rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Modern Card */
+.modern-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.modern-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.card-image-wrapper {
+    height: 180px;
+    background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Patterns */
+.pattern-academic {
+    background-image: radial-gradient(#4f46e5 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.pattern-seminar {
+    background: repeating-linear-gradient(45deg, #8b5cf6, #8b5cf6 10px, #fff 10px, #fff 20px);
+    opacity: 0.1;
+}
+
+.card-badges {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+}
+
+.badge-custom {
+    padding: 0.35rem 0.85rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+}
+
+.badge-category {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-color);
+}
+
+.badge-price {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+}
+
+.badge-price.free {
+    background: rgba(55, 65, 81, 0.9);
+}
+
+.card-content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-title-modern {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--text-main);
+}
+
+.event-date-modern {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-footer-modern {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Buttons */
+.btn-card-primary {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-card-primary:hover {
+    background: var(--primary-dark);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Hero Carousel */
+.hero-carousel {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin-bottom: 3rem;
+    margin-top: 100px;
+    /* Offset for floating nav */
+}
+
+.hero-carousel .carousel-item {
+    height: 550px;
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-carousel .carousel-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.3));
+}
+
+.carousel-caption-custom {
+    position: absolute;
+    bottom: 50%;
+    transform: translateY(50%);
+    left: 4rem;
+    text-align: left;
+    max-width: 650px;
+    color: white;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .hero-carousel .carousel-item {
+        height: 450px;
+    }
+
+    .carousel-caption-custom {
+        left: 2rem;
+        right: 2rem;
+    }
+
+    .carousel-caption-custom h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Category Pills */
+.category-pills-container {
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.category-pills-container::-webkit-scrollbar {
+    display: none;
+}
+
+.category-pills {
+    display: flex;
+    gap: 10px;
+    min-width: min-content;
+}
+
+.cat-pill {
+    padding: 10px 24px;
+    border-radius: 50px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.cat-pill.active {
+    background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* Testimonials */
+.testimonial-scroll-container {
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 2rem 0;
+}
+
+.testimonial-track {
+    display: inline-flex;
+    animation: scroll 50s linear infinite;
+    gap: 2rem;
+}
+
+.testimonial-card-premium {
+    width: 300px;
+    white-space: normal;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #f3f4f6;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Other Sections */
+.feature-section {
+    padding: 5rem 0;
+    background: white;
+}
+
+.feature-card {
+    transition: all 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Footer */
+.modern-footer {
+    background: white;
+    padding: 4rem 2rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    margin-top: auto;
+}
+
+.footer-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.footer-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+}
+
+/* Helper Classes */
+.hover-lift-lg:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}

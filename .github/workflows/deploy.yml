@@ -1,0 +1,49 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main  # Set this to your default branch (main or master)
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      # 1. Deploy Backend (Core System) -> event_app_core folder
+      # We upload: config, modules, vendor, templates, composer.json
+      - name: 📂 Sync Backend Files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Upload these folders
+          server-dir: ./event_app_core/
+          local-dir: ./
+          # ONLY upload backend stuff, exclude public and git files
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            public/**
+            deploy/**
+            docs/**
+            README.md
+            .env.example
+            .gitignore
+            database/**
+            
+      # 2. Deploy Frontend (Public) -> public_html folder
+      # We upload the CONTENTS of /public to public_html
+      - name: 🌐 Sync Frontend Files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ./public_html/
+          local-dir: ./public/
