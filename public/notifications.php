@@ -111,100 +111,7 @@ $unreadCount = $notificationService->getUnreadCount($currentUser['id']);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/layout.css">
     <link rel="stylesheet" href="assets/css/responsive.css?v=1">
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f3f4f6;
-        }
-
-        .page-header {
-            background: white;
-            padding: 2rem;
-            border-radius: 16px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .notification-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(229, 231, 235, 0.5);
-        }
-
-        .notif-item {
-            padding: 1.5rem;
-            border-bottom: 1px solid #f3f4f6;
-            transition: background-color 0.2s;
-            position: relative;
-        }
-
-        .notif-item:last-child {
-            border-bottom: none;
-        }
-
-        .notif-item:hover {
-            background-color: #f9fafb;
-        }
-
-        /* Unread State */
-        .notif-item.unread {
-            background-color: #f0f7ff;
-        }
-
-        .notif-item.unread::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background-color: #4361ee;
-        }
-
-        .notif-icon-box {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            flex-shrink: 0;
-        }
-
-        .mark-read-btn {
-            font-size: 0.8rem;
-            color: #4361ee;
-            background: rgba(67, 97, 238, 0.1);
-            padding: 4px 12px;
-            border-radius: 50px;
-            border: none;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .mark-read-btn:hover {
-            background: #4361ee;
-            color: white;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 5rem 2rem;
-        }
-
-        .empty-state i {
-            display: block;
-            font-size: 4rem;
-            color: #e5e7eb;
-            margin-bottom: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/notifications.css?v=<?= time() ?>">
 </head>
 
 <body>
@@ -214,7 +121,7 @@ $unreadCount = $notificationService->getUnreadCount($currentUser['id']);
     <div class="main-content">
         <div class="container-fluid">
             <!-- Page Header -->
-            <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="page-header-notif d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <h2 class="fw-bold text-dark mb-1">Notifikasi</h2>
                     <p class="text-muted mb-0">Update terbaru seputar aktivitas dan event Anda.</p>
@@ -232,7 +139,7 @@ $unreadCount = $notificationService->getUnreadCount($currentUser['id']);
             <!-- Notifications List -->
             <div class="notification-card">
                 <?php if (empty($notifications)): ?>
-                    <div class="empty-state">
+                    <div class="empty-state-notif">
                         <i class="bi bi-bell-slash"></i>
                         <h4 class="text-dark fw-bold">Tidak ada notifikasi</h4>
                         <p class="text-muted">Semua update terbaru akan muncul disini.</p>

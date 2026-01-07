@@ -33,8 +33,27 @@ class NotificationService
                 $this->db->exec("ALTER TABLE notifications MODIFY event_id INT NULL");
             } catch (PDOException $e) {
                 // Ignore if error (e.g. might already be null or constraint specific syntax)
-                // But typically MODIFY event_id INT NULL works for MySQL
                 error_log("Schema Update Warning: " . $e->getMessage());
+            }
+
+            // Ensure is_read column exists
+            try {
+                $stmt = $this->db->query("SHOW COLUMNS FROM notifications LIKE 'is_read'");
+                if (!$stmt->fetch()) {
+                    $this->db->exec("ALTER TABLE notifications ADD COLUMN is_read TINYINT(1) DEFAULT 0");
+                }
+            } catch (PDOException $e) {
+                error_log("Schema Update (is_read) Error: " . $e->getMessage());
+            }
+
+            // Ensure read_at column exists
+            try {
+                $stmt = $this->db->query("SHOW COLUMNS FROM notifications LIKE 'read_at'");
+                if (!$stmt->fetch()) {
+                    $this->db->exec("ALTER TABLE notifications ADD COLUMN read_at DATETIME NULL");
+                }
+            } catch (PDOException $e) {
+                error_log("Schema Update (read_at) Error: " . $e->getMessage());
             }
         } catch (Exception $e) {
             error_log("Schema Migration Error: " . $e->getMessage());
@@ -359,7 +378,7 @@ class NotificationService
         }
     }
 
-    public function sendEmail($to, $name, $subject, $message)
+    public function sendEmail($to, $name, $subject, $message, $debug = false)
     {
         try {
             // Load PHPMailer if available
@@ -375,7 +394,13 @@ class NotificationService
                         if (strpos(trim($line), '#') === 0)
                             continue;
                         list($key, $value) = explode('=', $line, 2);
-                        $env[trim($key)] = trim($value);
+                        $key = trim($key);
+                        $value = trim($value);
+                        // Remove quotes if present
+                        if (preg_match('/^"(.*)"$/', $value, $matches) || preg_match("/^'(.*)'$/", $value, $matches)) {
+                            $value = $matches[1];
+                        }
+                        $env[$key] = $value;
                     }
                 }
 
@@ -383,6 +408,11 @@ class NotificationService
 
                 if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
                     $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+
+                    if ($debug) {
+                        $mail->SMTPDebug = 2; // DEBUG_SERVER
+                        $mail->Debugoutput = 'html';
+                    }
 
                     $mail->isSMTP();
                     $mail->Host = $env['SMTP_HOST'] ?? 'smtp.gmail.com';
@@ -455,7 +485,7 @@ class NotificationService
                     <p>Halo <strong>{$recipientName}</strong>,</p>
                     <p>{$message}</p>
                     <center>
-                        <a href='{$appUrl}/public/my-events.php' class='btn'>Lihat Tiket Saya</a>
+                        <a href='{$appUrl}/my-events.php' class='btn'>Lihat Tiket Saya</a>
                     </center>
                     <p style='margin-top: 30px; font-size: 14px; color: #64748b;'>
                         Email ini dikirim secara otomatis. Mohon tidak membalas email ini.

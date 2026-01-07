@@ -78,7 +78,7 @@ $users = $auth->getAllUsers();
                         </div>
                     <?php else: ?>
                         <div class="glass-card table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-custom table-hover">
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4">No</th>
@@ -92,17 +92,18 @@ $users = $auth->getAllUsers();
                                 <tbody>
                                     <?php foreach ($users as $index => $user): ?>
                                         <tr>
-                                            <td><?= $index + 1 ?></td>
-                                            <td><?= htmlspecialchars($user['nama']) ?></td>
-                                            <td><?= htmlspecialchars($user['email']) ?></td>
-                                            <td>
+                                            <td data-label="No"><?= $index + 1 ?></td>
+                                            <td data-label="Nama"><?= htmlspecialchars($user['nama']) ?></td>
+                                            <td data-label="Email"><?= htmlspecialchars($user['email']) ?></td>
+                                            <td data-label="Role">
                                                 <span
                                                     class="badge <?= $user['role'] === 'admin' ? 'bg-danger' : 'bg-primary' ?>">
                                                     <?= ucfirst($user['role']) ?>
                                                 </span>
                                             </td>
-                                            <td><?= date('d/m/Y', strtotime($user['created_at'])) ?></td>
-                                            <td>
+                                            <td data-label="Tanggal Daftar"><?= date('d/m/Y', strtotime($user['created_at'])) ?>
+                                            </td>
+                                            <td class="text-end" data-label="Aksi">
                                                 <div class="btn-group" role="group">
                                                     <a href="user-edit.php?id=<?= $user['id'] ?>"
                                                         class="btn btn-sm btn-outline-primary">

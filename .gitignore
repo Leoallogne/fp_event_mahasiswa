@@ -1,5 +1,7 @@
 # Environment files
 .env
+.env.bak
+.env.local
 
 # Composer
 /vendor/

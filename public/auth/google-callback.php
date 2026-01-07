@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../config/session.php';
 require_once __DIR__ . '/../../modules/users/GoogleAuth.php';
 
 $googleAuth = new GoogleAuth();
+error_log("DEBUG: Google Callback Hit. GET: " . print_r($_GET, true));
 
 // Auto-migrate database if needed
 try {
@@ -138,5 +139,11 @@ if (isset($_GET['code'])) {
 }
 
 // If something goes wrong
-header('Location: ../login.php?error=google_failed');
+$errorMessage = $_GET['error'] ?? 'google_failed';
+$errorDescription = $_GET['error_description'] ?? 'Authentication failed';
+
+error_log("Google OAuth Error: " . $errorMessage . " - " . $errorDescription);
+error_log("Full GET params: " . print_r($_GET, true));
+
+header('Location: ../login.php?error=' . urlencode($errorMessage));
 exit;

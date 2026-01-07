@@ -6,6 +6,7 @@ class Database
     private $dbname;
     private $username;
     private $password;
+    private $port;
     private $conn;
 
     public function __construct()
@@ -32,9 +33,13 @@ class Database
         }
 
         $this->host = $_ENV['DB_HOST'] ?? 'localhost';
+        if ($this->host === 'localhost') {
+            $this->host = '127.0.0.1';
+        }
         $this->dbname = $_ENV['DB_NAME'] ?? 'event_management';
         $this->username = $_ENV['DB_USER'] ?? 'root';
         $this->password = $_ENV['DB_PASS'] ?? 'root';
+        $this->port = $_ENV['DB_PORT'] ?? '3306';
     }
 
     public function getConnection()
@@ -42,7 +47,7 @@ class Database
         $this->conn = null;
 
         try {
-            $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->dbname . ";charset=utf8mb4";
+            $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->dbname . ";charset=utf8mb4";
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

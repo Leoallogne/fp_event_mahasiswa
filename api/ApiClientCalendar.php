@@ -14,6 +14,7 @@ class ApiClientCalendar
     {
         $database = new Database();
         $this->db = $database->getConnection();
+        $this->ensureSchemaUpdated();
 
         // Load environment variables
         $envFile = __DIR__ . '/../.env';
@@ -30,6 +31,19 @@ class ApiClientCalendar
         $this->apiKey = $_ENV['GOOGLE_CALENDAR_API_KEY'] ?? '';
         $this->clientId = $_ENV['GOOGLE_CALENDAR_CLIENT_ID'] ?? '';
         $this->clientSecret = $_ENV['GOOGLE_CALENDAR_CLIENT_SECRET'] ?? '';
+    }
+
+    private function ensureSchemaUpdated()
+    {
+        try {
+            $this->db->exec("CREATE TABLE IF NOT EXISTS calendar_cache (
+                event_id VARCHAR(255) PRIMARY KEY,
+                event_data TEXT,
+                cached_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )");
+        } catch (PDOException $e) {
+            error_log("Calendar Cache Schema Error: " . $e->getMessage());
+        }
     }
 
     public function fetch($calendarId = 'primary', $timeMin = null, $timeMax = null)

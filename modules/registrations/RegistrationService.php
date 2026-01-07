@@ -56,7 +56,7 @@ class RegistrationService
             // Lock the event row and get current details
             // FOR UPDATE protects against concurrent quota reads
             $stmt = $this->db->prepare("SELECT kuota, price,
-                                        (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id AND r.status = 'confirmed') as registered_count
+                                        (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id AND r.status IN ('confirmed', 'pending')) as registered_count
                                         FROM events e
                                         WHERE e.id = ?
                                         FOR UPDATE");

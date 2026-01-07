@@ -144,336 +144,45 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/profile.css?v=<?= time() ?>">
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            --font-inter: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #f3f4f6;
-            font-family: var(--font-inter);
-            color: #1f2937;
-        }
-
-        /* Hero Profile Section */
+        /* Quick responsive tweaks */
         .profile-hero {
-            background: var(--primary-gradient);
-            padding: 3rem 2rem 8rem;
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
         }
 
-        .profile-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.4;
-        }
-
-        .profile-hero-content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            color: white;
+        @media (min-width: 768px) {
+            .profile-hero {
+                flex-direction: row;
+                justify-content: flex-start;
+            }
         }
 
         .avatar-wrapper {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            margin: 0 auto 1.5rem;
-        }
-
-        .profile-avatar {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3.5rem;
-            color: #4f46e5;
-            overflow: hidden;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .hero-name {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .hero-email {
-            font-size: 1rem;
-            opacity: 0.9;
             margin-bottom: 1rem;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            padding: 0.5rem 1.25rem;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        /* Stats Section */
-        .stats-section {
-            margin-top: -5rem;
-            padding: 0 2rem 2rem;
-            position: relative;
-            z-index: 2;
         }
 
         .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(229, 231, 235, 0.5);
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .stat-icon.primary {
-            background: rgba(79, 70, 229, 0.1);
-            color: #4f46e5;
-        }
-
-        .stat-icon.success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-
-        .stat-icon.info {
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
-
-        /* Content Section */
-        .content-section {
-            padding: 0 2rem 2rem;
+            text-align: center;
+            padding: 1rem;
         }
 
         .content-card {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid rgba(229, 231, 235, 0.5);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
+            margin-top: 2rem;
         }
 
-        /* Tabs */
+        /* Force horizontal tabs */
         .nav-tabs-custom {
-            border-bottom: 2px solid #f3f4f6;
-            padding: 0 1.5rem;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
         }
 
-        .nav-tabs-custom .nav-link {
-            border: none;
-            color: #6b7280;
-            font-weight: 500;
-            padding: 1rem 1.5rem;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .nav-tabs-custom .nav-link:hover {
-            color: #4f46e5;
-        }
-
-        .nav-tabs-custom .nav-link.active {
-            color: #4f46e5;
-            background: transparent;
-        }
-
-        .nav-tabs-custom .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #4f46e5;
-        }
-
-        .tab-content {
-            padding: 2rem 1.5rem;
-        }
-
-        /* Form Styling */
-        .form-label {
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control,
-        .form-select {
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            transition: all 0.2s;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Avatar Upload */
-        .avatar-upload-wrapper {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .avatar-preview {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-            overflow: hidden;
-            border: 3px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f9fafb;
-            font-size: 3rem;
-            color: #d1d5db;
-        }
-
-        .avatar-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .btn-upload {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .btn-upload input[type=file] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-outline-secondary {
-            border: 1px solid #e5e7eb;
-            color: #4b5563;
-            background: #fff;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-outline-secondary:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
-            color: #374151;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .avatar-upload-wrapper:hover .avatar-preview {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-
-
-            .profile-hero {
-                padding: 2rem 1rem 6rem;
-            }
-
-            .hero-name {
-                font-size: 1.5rem;
-            }
-
-            .stats-section {
-                padding: 0 1rem 1rem;
-                margin-top: -4rem;
-            }
-
-            .content-section {
-                padding: 0 1rem 1rem;
-            }
-
-            .nav-tabs-custom {
-                padding: 0 0.5rem;
-            }
-
-            .nav-tabs-custom .nav-link {
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-            }
+        .nav-tabs-custom .nav-item {
+            display: inline-block !important;
         }
     </style>
 </head>
@@ -490,7 +199,8 @@ try {
                         <?php
                         $avatar = $currentUser['avatar'] ?? '';
                         if (!empty($avatar) && file_exists(__DIR__ . '/uploads/avatars/' . $avatar)): ?>
-                            <img src="uploads/avatars/<?= htmlspecialchars($avatar) ?>" alt="Avatar">
+                            <img src="uploads/avatars/<?= htmlspecialchars($avatar) ?>" alt="Avatar"
+                                class="img-fluid rounded-circle" loading="lazy" style="max-width:150px; height:auto;">
                         <?php else: ?>
                             <i class="bi bi-person"></i>
                         <?php endif; ?>
@@ -581,7 +291,7 @@ try {
 
             <div class="content-card">
                 <!-- Tabs -->
-                <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                <ul class="nav nav-tabs nav-tabs-custom d-flex flex-row" role="tablist" style="flex-wrap: wrap;">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-tab"
                             type="button">
@@ -607,33 +317,40 @@ try {
                         <form method="POST" action="" enctype="multipart/form-data">
                             <input type="hidden" name="action" value="update_profile">
 
-                            <div class="avatar-upload-wrapper">
-                                <div class="avatar-preview" id="avatarPreview">
-                                    <?php if (!empty($avatar) && file_exists(__DIR__ . '/uploads/avatars/' . $avatar)): ?>
-                                        <img src="uploads/avatars/<?= htmlspecialchars($avatar) ?>" alt="Avatar">
-                                    <?php else: ?>
-                                        <i class="bi bi-person"></i>
-                                    <?php endif; ?>
-                                </div>
-                                <label class="btn btn-outline-secondary btn-upload">
-                                    <i class="bi bi-camera me-2"></i>Pilih Foto
-                                    <input type="file" id="avatar" name="avatar" accept="image/*"
-                                        onchange="previewAvatar(event)">
-                                </label>
-                                <p class="text-muted small mt-2 mb-0">JPG, PNG, atau GIF (Max 2MB)</p>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="nama" class="form-label">Nama Lengkap</label>
-                                    <input type="text" class="form-control" id="nama" name="nama"
-                                        value="<?= htmlspecialchars($currentUser['nama']) ?>" required>
+                            <div class="row g-3 mb-4">
+                                <!-- Avatar Section -->
+                                <div class="col-md-4 text-center">
+                                    <div class="avatar-preview mb-3" id="avatarPreview" style="display: inline-block;">
+                                        <?php if (!empty($avatar) && file_exists(__DIR__ . '/uploads/avatars/' . $avatar)): ?>
+                                            <img src="uploads/avatars/<?= htmlspecialchars($avatar) ?>" alt="Avatar"
+                                                class="img-fluid rounded-circle" loading="lazy"
+                                                style="max-width:150px; height:auto;">
+                                        <?php else: ?>
+                                            <i class="bi bi-person"></i>
+                                        <?php endif; ?>
+                                    </div>
+                                    <label class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                                        <i class="bi bi-camera me-2"></i>Pilih Foto
+                                        <input type="file" id="avatar" name="avatar" accept="image/*"
+                                            style="display:none;" onchange="previewAvatar(event)">
+                                    </label>
+                                    <p class="text-muted small mb-0">JPG, PNG, atau GIF (Max 2MB)</p>
                                 </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email"
-                                        value="<?= htmlspecialchars($currentUser['email']) ?>" required>
+                                <!-- Form Fields -->
+                                <div class="col-md-8">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="nama" class="form-label">Nama Lengkap</label>
+                                            <input type="text" class="form-control" id="nama" name="nama"
+                                                value="<?= htmlspecialchars($currentUser['nama']) ?>" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                value="<?= htmlspecialchars($currentUser['email']) ?>" required>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -653,21 +370,19 @@ try {
                         <form method="POST" action="">
                             <input type="hidden" name="action" value="change_password">
 
-                            <div class="mb-3">
-                                <label for="current_password" class="form-label">Password Lama</label>
-                                <input type="password" class="form-control" id="current_password"
-                                    name="current_password" required>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="current_password" class="form-label">Password Lama</label>
+                                    <input type="password" class="form-control" id="current_password"
+                                        name="current_password" required>
+                                </div>
+                                <div class="col-md-4">
                                     <label for="new_password" class="form-label">Password Baru</label>
                                     <input type="password" class="form-control" id="new_password" name="new_password"
                                         required minlength="6">
                                     <small class="text-muted">Minimal 6 karakter</small>
                                 </div>
-
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-4">
                                     <label for="confirm_password" class="form-label">Konfirmasi Password Baru</label>
                                     <input type="password" class="form-control" id="confirm_password"
                                         name="confirm_password" required minlength="6">
@@ -743,8 +458,8 @@ try {
                 reader.onload = function (e) {
                     const preview = document.getElementById('avatarPreview');
                     const heroAvatar = document.getElementById('heroAvatar');
-                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                    heroAvatar.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-fluid rounded-circle" loading="lazy" style="max-width:150px; height:auto;">`;
+                    heroAvatar.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-fluid rounded-circle" loading="lazy" style="max-width:150px; height:auto;">`;
                 }
                 reader.readAsDataURL(file);
             }

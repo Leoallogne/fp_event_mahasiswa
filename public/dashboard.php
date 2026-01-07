@@ -384,7 +384,7 @@ foreach ($categoryData as $data) {
 
                         <?php if (!empty($recentActivities)): ?>
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle">
+                                <table class="table table-custom table-hover align-middle">
                                     <thead class="bg-light bg-opacity-50">
                                         <tr>
                                             <th class="border-0 ps-3 py-3 text-secondary text-uppercase small fw-bold">Event
@@ -408,7 +408,7 @@ foreach ($categoryData as $data) {
                                                 $statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Dibatalkan</span>';
                                             ?>
                                             <tr>
-                                                <td class="border-bottom-0 ps-3 py-3">
+                                                <td class="border-bottom-0 ps-3 py-3" data-label="Event">
                                                     <div class="d-flex align-items-center">
                                                         <div class="bg-primary bg-opacity-10 rounded p-2 me-3 text-primary text-center"
                                                             style="min-width: 50px;">
@@ -428,8 +428,8 @@ foreach ($categoryData as $data) {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="border-bottom-0 py-3"><?= $statusBadge ?></td>
-                                                <td class="border-bottom-0 pe-3 py-3 text-end">
+                                                <td class="border-bottom-0 py-3" data-label="Status"><?= $statusBadge ?></td>
+                                                <td class="border-bottom-0 pe-3 py-3 text-end" data-label="Aksi">
                                                     <a href="event-detail.php?id=<?= $activity['id'] ?>"
                                                         class="btn btn-sm btn-light rounded-circle" data-bs-toggle="tooltip"
                                                         title="Lihat Detail">

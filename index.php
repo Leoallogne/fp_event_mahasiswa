@@ -1,3 +1,3 @@
 <?php
-header('Location: public/landing.php');
+header('Location: public/index.php');
 exit;

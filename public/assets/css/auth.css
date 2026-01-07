@@ -546,3 +546,29 @@ body {
         font-size: 1.75rem;
     }
 }
+
+/* Auth Mobile Fix */
+@media (max-width: 991.98px) {
+    .auth-container {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+        overflow-y: auto;
+    }
+    
+    .auth-hero {
+        display: none !important; /* Hide hero image on mobile to focus on form */
+    }
+    
+    .auth-form-section {
+        padding: 2rem 1.5rem;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-wrapper {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}

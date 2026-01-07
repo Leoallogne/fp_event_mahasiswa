@@ -133,45 +133,7 @@ $categories = $categoryService->getAllCategories();
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/admin-modern.css">
-    <style>
-        #map {
-            height: 400px;
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            margin-top: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Leaflet Specifics kept for map functionality */
-        .leaflet-popup-content {
-            margin: 10px 15px;
-            line-height: 1.4;
-        }
-
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .search-result-item {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-
-        .search-result-item:hover {
-            background-color: #f8f9fa;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/admin-events.css">
 </head>
 
 <body>
@@ -195,10 +157,10 @@ $categories = $categoryService->getAllCategories();
             <?php endif; ?>
 
             <div class="glass-card table-responsive">
-                <table class="table table-hover">
+                <table class="table table-custom table-hover">
                     <thead class="bg-light">
                         <tr>
-                            <th class="ps-4">ID</th>
+                            <th class="ps-4 d-none d-md-table-cell">ID</th>
                             <th>Judul Event</th>
                             <th>Kategori</th>
                             <th>Jadwal</th>
@@ -212,12 +174,24 @@ $categories = $categoryService->getAllCategories();
                     <tbody>
                         <?php foreach ($events as $event): ?>
                             <tr>
-                                <td><?= $event['id'] ?></td>
-                                <td><?= htmlspecialchars($event['title']) ?></td>
-                                <td><span class="badge bg-primary"><?= htmlspecialchars($event['kategori']) ?></span></td>
-                                <td><?= date('d/m/Y H:i', strtotime($event['tanggal'])) ?></td>
-                                <td><?= htmlspecialchars($event['lokasi']) ?></td>
-                                <td>
+                                <td class="d-none d-md-table-cell" data-label="ID"><?= $event['id'] ?></td>
+                                <td data-label="Judul Event">
+                                    <div class="fw-bold text-truncate" style="max-width: 150px;"
+                                        title="<?= htmlspecialchars($event['title']) ?>">
+                                        <?= htmlspecialchars($event['title']) ?>
+                                    </div>
+                                </td>
+                                <td data-label="Kategori"><span
+                                        class="badge bg-primary"><?= htmlspecialchars($event['kategori']) ?></span></td>
+                                <td data-label="Jadwal" class="text-nowrap">
+                                    <?= date('d/m/Y H:i', strtotime($event['tanggal'])) ?></td>
+                                <td data-label="Lokasi">
+                                    <div class="text-truncate" style="max-width: 150px;"
+                                        title="<?= htmlspecialchars($event['lokasi']) ?>">
+                                        <?= htmlspecialchars($event['lokasi']) ?>
+                                    </div>
+                                </td>
+                                <td data-label="Harga">
                                     <?php if (!empty($event['price']) && $event['price'] > 0): ?>
                                         <span class="badge bg-success">Rp
                                             <?= number_format($event['price'], 0, ',', '.') ?></span>
@@ -225,23 +199,23 @@ $categories = $categoryService->getAllCategories();
                                         <span class="badge bg-secondary">Gratis</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?= $event['kuota'] ?></td>
-                                <td><?= $event['registered_count'] ?? 0 ?></td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning"
-                                        onclick="editEvent(<?= htmlspecialchars(json_encode($event)) ?>)">
-                                        <i class="bi bi-pencil"></i> Edit
+                                <td data-label="Kuota"><?= $event['kuota'] ?></td>
+                                <td data-label="Peserta"><?= $event['registered_count'] ?? 0 ?></td>
+                                <td class="text-end text-nowrap" data-label="Aksi">
+                                    <button class="btn btn-sm btn-warning" type="button"
+                                        onclick='editEvent(<?= json_encode($event, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
+                                        <i class="bi bi-pencil"></i>
                                     </button>
                                     <form method="POST" style="display:inline;"
                                         onsubmit="return confirm('Yakin ingin menghapus?')">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?= $event['id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i> Hapus
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
                                     <a href="event-participants.php?id=<?= $event['id'] ?>" class="btn btn-sm btn-info">
-                                        <i class="bi bi-people"></i> Peserta
+                                        <i class="bi bi-people"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -256,7 +230,7 @@ $categories = $categoryService->getAllCategories();
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tambah/Edit Event</h5>
+                        <h5 class="modal-title" id="eventModalLabel">Tambah/Edit Event</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <form method="POST" id="eventForm">
@@ -364,6 +338,7 @@ $categories = $categoryService->getAllCategories();
             let map, marker, searchResults = [];
             const defaultLat = -6.200000;
             const defaultLng = 106.816666;
+
 
             // Custom marker icon
             const eventIcon = L.icon({
@@ -692,7 +667,7 @@ $categories = $categoryService->getAllCategories();
 
             function resetForm() {
                 document.getElementById('eventForm').reset();
-                document.getElementById('action').value = 'create';
+                document.getElementById('formAction').value = 'create';
                 document.getElementById('eventId').value = '';
                 document.getElementById('eventModalLabel').textContent = 'Tambah Event';
                 document.getElementById('latitude').value = '';
@@ -726,15 +701,24 @@ $categories = $categoryService->getAllCategories();
             }
 
             function editEvent(event) {
+                console.log('Edit Event Called:', event); // Debug log
+                
                 document.getElementById('eventModalLabel').textContent = 'Edit Event';
                 document.getElementById('eventId').value = event.id;
-                document.getElementById('action').value = 'update';
-                document.getElementById('eventTitle').value = event.title;
-                document.getElementById('eventKategori').value = event.kategori;
-                document.getElementById('eventTanggal').value = event.tanggal;
-                document.getElementById('lokasi').value = event.lokasi;
-                document.getElementById('eventDeskripsi').value = event.deskripsi;
-                document.getElementById('eventKuota').value = event.kuota;
+                document.getElementById('formAction').value = 'update';
+                document.getElementById('eventTitle').value = event.title || '';
+                document.getElementById('eventKategori').value = event.kategori || '';
+
+                // Robust date formatting - avoid Date() constructor issues
+                if (event.tanggal) {
+                    // Format: "2025-12-23 12:33:00" -> "2025-12-23T12:33"
+                    let formattedDate = event.tanggal.substring(0, 16).replace(' ', 'T');
+                    document.getElementById('eventTanggal').value = formattedDate;
+                }
+
+                document.getElementById('lokasi').value = event.lokasi || '';
+                document.getElementById('eventDeskripsi').value = event.deskripsi || '';
+                document.getElementById('eventKuota').value = event.kuota || '';
 
                 // Handle Map
                 if (event.latitude && event.longitude) {
@@ -743,38 +727,48 @@ $categories = $categoryService->getAllCategories();
                     document.getElementById('latitude').value = lat;
                     document.getElementById('longitude').value = lng;
 
-                    if (marker) map.removeLayer(marker);
-                    marker = L.marker([lat, lng], {
-                        icon: eventIcon,
-                        draggable: true
-                    }).addTo(map);
+                    if (map && marker) {
+                        map.removeLayer(marker);
+                    }
+                    
+                    if (map) {
+                        marker = L.marker([lat, lng], {
+                            icon: eventIcon,
+                            draggable: true
+                        }).addTo(map);
 
-                    map.setView([lat, lng], 15);
+                        map.setView([lat, lng], 15);
 
-                    marker.on('dragend', function (e) {
-                        const position = marker.getLatLng();
-                        updateLocationInput(position.lat, position.lng);
-                    });
+                        marker.on('dragend', function () {
+                            const position = marker.getLatLng();
+                            document.getElementById('latitude').value = position.lat;
+                            document.getElementById('longitude').value = position.lng;
+                            // Update location name via reverse geocoding
+                            updateAddressFromCoordinates(position.lat, position.lng);
+                        });
+                    }
                 }
 
                 // Handle Paid/Price
                 const isPaidCheckbox = document.getElementById('is_paid');
                 const priceInput = document.getElementById('eventPrice');
-                // Check if is_paid property exists (it might be 1 or 0 string from DB)
                 const isPaid = event.is_paid == 1 || event.price > 0;
 
                 isPaidCheckbox.checked = isPaid;
                 togglePriceInput();
 
-                if (isPaid) {
+                if (isPaid && event.price) {
                     priceInput.value = event.price;
                 }
 
-                new bootstrap.Modal(document.getElementById('eventModal')).show();
+                // Show the modal
+                const modalElement = document.getElementById('eventModal');
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
 
                 // Refresh map size after modal opens
                 setTimeout(() => {
-                    map.invalidateSize();
+                    if (map) map.invalidateSize();
                 }, 500);
             }
         </script>

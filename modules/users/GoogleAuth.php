@@ -37,6 +37,24 @@ class GoogleAuth
 
         $database = new Database();
         $this->db = $database->getConnection();
+        $this->ensureSchemaUpdated();
+    }
+
+    private function ensureSchemaUpdated()
+    {
+        try {
+            // Check if google_access_token exists
+            $stmt = $this->db->query("SHOW COLUMNS FROM users LIKE 'google_access_token'");
+            if (!$stmt->fetch()) {
+                $this->db->exec("ALTER TABLE users ADD COLUMN google_access_token TEXT NULL");
+                $this->db->exec("ALTER TABLE users ADD COLUMN google_refresh_token TEXT NULL");
+                $this->db->exec("ALTER TABLE users ADD COLUMN google_token_expires_in INT NULL");
+                $this->db->exec("ALTER TABLE users ADD COLUMN google_token_created INT NULL");
+            }
+        } catch (PDOException $e) {
+            // Ignore if error or columns exist
+            error_log("GoogleAuth Schema Update Error: " . $e->getMessage());
+        }
     }
 
     public function getAuthUrl()

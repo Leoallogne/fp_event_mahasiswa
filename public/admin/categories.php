@@ -68,7 +68,7 @@ $categories = $categoryService->getAllCategories();
             <?php endif; ?>
 
             <div class="glass-card table-responsive">
-                <table class="table table-hover">
+                <table class="table table-custom table-hover">
                     <thead class="bg-light">
                         <tr>
                             <th class="ps-4">ID</th>
@@ -80,10 +80,10 @@ $categories = $categoryService->getAllCategories();
                     <tbody>
                         <?php foreach ($categories as $cat): ?>
                             <tr>
-                                <td><?= $cat['id'] ?></td>
-                                <td><?= htmlspecialchars($cat['nama']) ?></td>
-                                <td><?= htmlspecialchars($cat['deskripsi']) ?></td>
-                                <td>
+                                <td data-label="ID"><?= $cat['id'] ?></td>
+                                <td data-label="Nama"><?= htmlspecialchars($cat['nama']) ?></td>
+                                <td data-label="Deskripsi"><?= htmlspecialchars($cat['deskripsi']) ?></td>
+                                <td class="text-end" data-label="Aksi">
                                     <button class="btn btn-sm btn-warning"
                                         onclick="editCategory(<?= htmlspecialchars(json_encode($cat)) ?>)">
                                         <i class="bi bi-pencil"></i> Edit
@@ -147,9 +147,10 @@ $categories = $categoryService->getAllCategories();
             function editCategory(cat) {
                 document.getElementById('formAction').value = 'update';
                 document.getElementById('categoryId').value = cat.id;
-                document.getElementById('categoryNama').value = cat.nama;
+                document.getElementById('categoryNama').value = cat.nama || '';
                 document.getElementById('categoryDeskripsi').value = cat.deskripsi || '';
 
+                // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
                 modal.show();
             }

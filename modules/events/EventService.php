@@ -19,7 +19,7 @@ class EventService
                     COUNT(r.id) as registered_count
                     FROM events e
                     LEFT JOIN users u ON e.created_by = u.id
-                    LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'confirmed'
+                    LEFT JOIN registrations r ON e.id = r.event_id AND r.status IN ('confirmed', 'pending')
                     GROUP BY e.id
                     ORDER BY e.tanggal DESC";
 
@@ -49,7 +49,7 @@ class EventService
                                         COUNT(r.id) as registered_count
                                         FROM events e
                                         LEFT JOIN users u ON e.created_by = u.id
-                                        LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'confirmed'
+                                        LEFT JOIN registrations r ON e.id = r.event_id AND r.status IN ('confirmed', 'pending')
                                         WHERE e.id = ?
                                         GROUP BY e.id");
             $stmt->execute([$id]);
@@ -175,7 +175,7 @@ class EventService
                                         COUNT(r.id) as registered_count
                                         FROM events e
                                         LEFT JOIN users u ON e.created_by = u.id
-                                        LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'confirmed'
+                                        LEFT JOIN registrations r ON e.id = r.event_id AND r.status IN ('confirmed', 'pending')
                                         WHERE DATE(e.tanggal) >= CURDATE()
                                         GROUP BY e.id
                                         ORDER BY e.tanggal ASC
@@ -212,7 +212,7 @@ class EventService
                     COUNT(r.id) as registered_count
                     FROM events e
                     LEFT JOIN users u ON e.created_by = u.id
-                    LEFT JOIN registrations r ON e.id = r.event_id AND r.status = 'confirmed'
+                    LEFT JOIN registrations r ON e.id = r.event_id AND r.status IN ('confirmed', 'pending')
                     WHERE 1=1";
 
             $params = [];
