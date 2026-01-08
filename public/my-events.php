@@ -49,85 +49,70 @@ $registrations = $registrationService->getUserRegistrations($currentUser['id']);
                     </a>
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-custom mb-0">
-                        <thead>
-                            <tr>
-                                <th>Event</th>
-                                <th>Kategori</th>
-                                <th>Tanggal Event</th>
-                                <th>Tiket</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($registrations as $reg): ?>
-                                <tr>
-                                    <td data-label="Event" style="min-width: 200px;">
-                                        <div class="event-meta">
-                                            <a href="event-detail.php?id=<?= $reg['event_id'] ?>" class="event-meta-title">
-                                                <?= htmlspecialchars($reg['title']) ?>
-                                            </a>
-                                            <small class="text-muted">
-                                                <i class="bi bi-geo-alt me-1"></i><?= htmlspecialchars($reg['lokasi']) ?>
-                                            </small>
-                                        </div>
-                                    </td>
-                                    <td data-label="Kategori">
-                                        <span class="badge badge-soft bg-label-primary">
-                                            <?= htmlspecialchars($reg['kategori']) ?>
-                                        </span>
-                                    </td>
-                                    <td data-label="Tanggal">
-                                        <?= date('d M Y, H:i', strtotime($reg['tanggal'])) ?>
-                                    </td>
-                                    <td data-label="Tiket">
-                                        <?php if (!empty($reg['price']) && $reg['price'] > 0): ?>
-                                            <span class="fw-medium text-dark">Rp
-                                                <?= number_format($reg['price'], 0, ',', '.') ?></span>
-                                        <?php else: ?>
-                                            <span class="text-success fw-medium">Gratis</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td data-label="Status">
-                                        <?php if ($reg['status'] === 'confirmed'): ?>
-                                            <span class="badge-soft bg-label-success px-2 py-1 rounded-pill">
-                                                <i class="bi bi-check-circle-fill me-1"></i> Terkonfirmasi
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge-soft bg-label-warning px-2 py-1 rounded-pill text-warning"
-                                                style="background-color: rgba(245, 158, 11, 0.1);">
-                                                <i class="bi bi-clock-history me-1"></i> Menunggu Bayar
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td data-label="Aksi">
-                                        <div class="d-flex gap-2 justify-content-end justify-content-lg-start">
-                                            <?php if ($reg['status'] === 'pending'): ?>
-                                                <a href="payment.php?id=<?= $reg['event_id'] ?>"
-                                                    class="btn btn-sm btn-primary px-3 rounded-pill" title="Bayar Sekarang">
-                                                    <i class="bi bi-credit-card me-1"></i> Bayar
-                                                </a>
-                                            <?php endif; ?>
-                                            <a href="event-detail.php?id=<?= $reg['event_id'] ?>" class="btn-action"
-                                                title="Lihat Detail" data-bs-toggle="tooltip">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
+                <div class="ticket-grid">
+                    <?php foreach ($registrations as $reg): ?>
+                        <div class="ticket-card">
+                            <div class="ticket-header">
+                                <div class="ticket-date">
+                                    <span class="day"><?= date('d', strtotime($reg['tanggal'])) ?></span>
+                                    <span class="month-year"><?= date('M Y', strtotime($reg['tanggal'])) ?></span>
+                                </div>
+                                <div class="ticket-status">
+                                    <?php if ($reg['status'] === 'confirmed'): ?>
+                                        <span class="text-white"><i class="bi bi-check-circle-fill me-1"></i> Confirmed</span>
+                                    <?php else: ?>
+                                        <span class="text-white"><i class="bi bi-clock me-1"></i> Pending</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
-                                            <!-- Google Calendar Link (Direct) -->
-                                            <?php if ($reg['status'] === 'confirmed'): ?>
-                                                <a href="export-calendar.php?id=<?= $reg['event_id'] ?>" class="btn-action"
-                                                    title="Add to Google Calendar" target="_blank" data-bs-toggle="tooltip">
-                                                    <i class="bi bi-calendar-plus"></i>
-                                                </a>
+                            <div class="ticket-divider"></div>
+
+                            <div class="ticket-body">
+                                <span class="ticket-category"><?= htmlspecialchars($reg['kategori'] ?? 'Event') ?></span>
+                                <h3 class="ticket-title"><?= htmlspecialchars($reg['title']) ?></h3>
+
+                                <div class="ticket-info">
+                                    <div class="info-item">
+                                        <i class="bi bi-clock"></i>
+                                        <span><?= date('H:i', strtotime($reg['tanggal'])) ?> WIB - Selesai</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span><?= htmlspecialchars($reg['lokasi']) ?></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="bi bi-ticket-perforated"></i>
+                                        <span>
+                                            <?php if (!empty($reg['price']) && $reg['price'] > 0): ?>
+                                                Rp <?= number_format($reg['price'], 0, ',', '.') ?>
+                                            <?php else: ?>
+                                                Gratis
                                             <?php endif; ?>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-auto d-flex gap-2">
+                                    <?php if ($reg['status'] === 'pending'): ?>
+                                        <a href="payment.php?id=<?= $reg['event_id'] ?>" class="btn-ticket btn-ticket-primary">
+                                            <i class="bi bi-credit-card"></i> Bayar Sekarang
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="export-calendar.php?id=<?= $reg['event_id'] ?>" target="_blank"
+                                            class="btn-ticket btn-ticket-outline">
+                                            <i class="bi bi-calendar-plus"></i> Add to Calendar
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <a href="event-detail.php?id=<?= $reg['event_id'] ?>" class="btn-ticket btn-ticket-outline"
+                                        style="width: auto;">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
         </div>
