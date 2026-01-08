@@ -2,7 +2,7 @@
 ## EventKu - Sistem Manajemen Event Mahasiswa Modern
 
 > **Navigasi Dokumentasi**:
-> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📂 Struktur Folder](02_FOLDER_STRUCTURE.md) | [🏗️ Arsitektur OOP](03_OOP_ARCHITECTURE.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
+> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📂 Struktur Folder](02_FOLDER_STRUCTURE.md) | [🏗️ Repo-Service Pattern](05_SERVICE_REPOSITORY_PATTERN.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
 
 ---
 

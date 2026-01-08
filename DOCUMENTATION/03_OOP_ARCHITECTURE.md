@@ -2,7 +2,7 @@
 ## Membedah Mesin di Balik EventKu
 
 > **Navigasi Dokumentasi**:
-> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📘 Overview](01_PROJECT_OVERVIEW.md) | [📂 Struktur Folder](02_FOLDER_STRUCTURE.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
+> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📘 Overview](01_PROJECT_OVERVIEW.md) | [📂 Struktur Folder](02_FOLDER_STRUCTURE.md) | [🏗️ Repo-Service Pattern](05_SERVICE_REPOSITORY_PATTERN.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
 
 ---
 

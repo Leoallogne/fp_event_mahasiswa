@@ -115,4 +115,4 @@ A: Pastikan `SMTP_PASS` di `.env` adalah **App Password** 16 digit dari Google, 
 
 ---
 **Dokumentasi Selanjutnya**:
-[-> Lihat Struktur Folder](02_FOLDER_STRUCTURE.md)
+[-> Lihat Struktur Folder](02_FOLDER_STRUCTURE.md) | [-> Repo-Service Pattern](05_SERVICE_REPOSITORY_PATTERN.md)

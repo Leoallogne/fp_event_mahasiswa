@@ -26,7 +26,7 @@ Kami percaya dokumentasi yang baik adalah kunci dari software yang hebat. Silaka
 | ⚙️ | **[Setup & Instalasi](DOCUMENTATION/00_SETUP_AND_INSTALLATION.md)** | **MULAI DARI SINI!** Panduan langkah-demi-langkah install di Localhost. |
 | 📘 | **[Project Overview](DOCUMENTATION/01_PROJECT_OVERVIEW.md)** | Latar belakang masalah, Solusi, dan Alur User (Flowchart). |
 | 📂 | **[Struktur Folder](DOCUMENTATION/02_FOLDER_STRUCTURE.md)** | Penjelasan arsitektur file `public` vs `modules` (Security). |
-| 🏗️ | **[Arsitektur OOP](DOCUMENTATION/03_OOP_ARCHITECTURE.md)** | Bedah kode, Design Pattern, dan cara menambah fitur baru. |
+| 🏗️ | **[Repo-Service Pattern](DOCUMENTATION/05_SERVICE_REPOSITORY_PATTERN.md)** | Penjelasan Logic vs View. |
 | 🗄️ | **[Database Schema](DOCUMENTATION/06_DATABASE_SCHEMA.md)** | Kamus data lengkap, relasi tabel (ERD), dan query penting. |
 | 📄 | **[Laporan Teknis](DOCUMENTATION/04_TECHNICAL_SPECIFICATION_REPORT.md)** | Spesifikasi detail untuk kebutuhan Tugas. |
 
