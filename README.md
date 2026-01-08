@@ -38,7 +38,7 @@ Kami percaya dokumentasi yang baik adalah kunci dari software yang hebat. Silaka
 *   **🔎 Discovery**: Cari event berdasarkan kategori (Seminar, Workshop, Lomba) atau tanggal.
 *   **🎫 One-Click Register**: Daftar event tanpa perlu isi Google Form berulang kali.
 *   **📅 Calendar Sync**: Otomatis menambahkan jadwal event ke **Google Calendar** pribadi.
-*   **📱 Tiket Digital**: QR Code unik sebagai tiket masuk yang bisa di-scan panitia.
+
 *   **🔔 Smart Notifications**: Notifikasi status pendaftaran via Email dan Dashboard.
 
 ### 👑 Untuk Penyelenggara (Admin)
