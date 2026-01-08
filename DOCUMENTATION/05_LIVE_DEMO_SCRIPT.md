@@ -1,6 +1,9 @@
 # 🎬 Dokumen 5: Skenario Live Demo (Naskah Presentasi)
 ## Panduan Presentasi "EventKu" di Depan Dosen
 
+> **Navigasi Dokumentasi**:
+> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📘 Overview](01_PROJECT_OVERVIEW.md) | [🏗️ Arsitektur OOP](03_OOP_ARCHITECTURE.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
+
 **Durasi Estimasi**: 5 - 7 Menit
 **Persiapan**:
 1.  Buka Browser (Chrome/Edge).

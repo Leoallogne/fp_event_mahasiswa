@@ -1,7 +1,12 @@
 # 📘 Dokumen 1: Project Overview (Gambaran Umum)
 ## EventKu - Sistem Manajemen Event Mahasiswa Modern
 
-> **Versi Dokumen**: 2.0 (Enhanced)
+> **Navigasi Dokumentasi**:
+> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📂 Struktur Folder](02_FOLDER_STRUCTURE.md) | [🏗️ Arsitektur OOP](03_OOP_ARCHITECTURE.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
+
+---
+
+> **Versi Dokumen**: 2.1 (Updated)
 > **Status Project**: Production Ready
 > **Technology**: Native PHP (OOP) + MySQL
 
@@ -82,32 +87,7 @@ Project ini dibangun dengan standar industri terkini untuk memastikan performa d
 
 ---
 
-### 4. 🗄️ Struktur Database (ERD)
-
-Sistem ini didukung oleh 6 tabel utama yang saling berelasi:
-
-1.  **`users`**
-    *   DATA: Profile user (Nama, Email, Password, Peran/Role).
-    *   FUNGSI: Menyimpan siapa yang boleh login.
-2.  **`events`**
-    *   DATA: Judul, Deskripsi, Tanggal, Harga, Kuota, Lokasi (Lat/Long).
-    *   FUNGSI: Katalog semua kegiatan.
-3.  **`events_categories`**
-    *   DATA: Nama Kategori (Seminar, Workshop, Musik).
-    *   FUNGSI: Mengelompokkan event agar mudah dicari.
-4.  **`registrations`** (Tabel Transaksi)
-    *   DATA: ID User, ID Event, Tanggal Daftar, Bukti Bayar, Status (Pending/Confirmed).
-    *   FUNGSI: Mencatat "Siapa Mendaftar Apa".
-5.  **`notifications`**
-    *   DATA: Pesan, Tipe (Success/Alert), Status Baca.
-    *   FUNGSI: Memberi tahu user jika pembayaran diterima/ditolak.
-6.  **`calendar_cache`**
-    *   DATA: Token sinkronisasi.
-    *   FUNGSI: Mempercepat proses loading kalender tanpa harus request ke Google terus-menerus.
-
----
-
-### 5. ✨ Fitur Unggulan (Key Highlights)
+### 4. ✨ Fitur Unggulan (Key Highlights)
 
 *   **🔒 Security First**:
     Folder inti sistem (`modules`, `config`) berada di luar folder `public`. Artinya, hacker **mustahil** mengakses file logika PHP secara langsung dari browser. Mereka hanya bisa melihat "pintu depan" (`index.php`, dll).
@@ -122,4 +102,5 @@ Sistem ini didukung oleh 6 tabel utama yang saling berelasi:
 
 ---
 
-Simpan dokumen ini sebagai referensi utama untuk memahami **"Apa itu EventKu"**.
+**Dokumentasi Selanjutnya**:
+[-> Lihat Struktur Folder](02_FOLDER_STRUCTURE.md)

@@ -1,6 +1,11 @@
 # 📂 Dokumen 2: Struktur File & Folder (Deep Dive)
 ## Peta Navigasi untuk Developer
 
+> **Navigasi Dokumentasi**:
+> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📘 Overview](01_PROJECT_OVERVIEW.md) | [🏗️ Arsitektur OOP](03_OOP_ARCHITECTURE.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
+
+---
+
 Project ini tidak menggunakan struktur PHP biasa (seperti semua file ditumpuk di satu folder). Kita menggunakan **"Public Folder Strategy"**.
 
 ### 🤔 Kenapa Struktur Ini?
@@ -20,54 +25,49 @@ mahasiswa_fp/  (ROOT PROJECT - AREA TERLARANG BAGI BROWSER)
 │
 ├── .env                [PENTING] File rahasia! Simpan password DB & API Key disini.
 ├── composer.json       Daftar pustaka tambahan (library) yang dipakai project.
+├── index.php           Redirector sederhana (jika user akses root folder).
 │
 ├── 📁 config/          (PENGATURAN DASAR)
-│   ├── database.php    Jantung koneksi database. File ini baca password dari .env.
-│   └── session.php     Mengatur agar login user tidak gampang dicuri (session hijacking).
+│   ├── database.php    Jantung koneksi database (PDO).
+│   └── session.php     Mengatur keamanan sesi login.
 │
 ├── 📁 modules/         (OTAK APLIKASI - LOGIC DISINI)
 │   ├── 📁 users/       
-│   │   ├── Auth.php        -> Mengurus Login, Logout, Cek Password.
-│   │   └── GoogleAuth.php  -> Mengurus komunikasi ribet dengan Google.
+│   │   └── Auth.php-       -> Class Login & Register.
 │   │
 │   ├── 📁 events/
-│   │   ├── EventService.php    -> Mengurus Tambah/Edit/Hapus Event.
-│   │   └── CategoryService.php -> Mengurus Kategori Event.
+│   │   ├── EventService.php    -> Logic CRUD Event.
 │   │
 │   ├── 📁 registrations/
-│   │   └── RegistrationService.php -> Mengurus Pendaftaran (Cek kuota, simpan data).
+│   │   └── RegistrationService.php -> Logic Pendaftaran & Transaksi.
 │   │
-│   └── 📁 analytics/
-│       └── AnalyticsService.php    -> Mengurus perhitungan statistik admin.
+│   └── 📁 notifications/
+│       └── NotificationService.php -> Logic Notifikasi.
 │
-├── 📁 api/             (JEMBATAN EKSTERNAL)
-│   └── ApiClientCalendar.php -> Helper khusus untuk kirim data ke Google Calendar.
+├── 📁 public/          (AREA PUBLIK - BAGIAN YANG DILIHAT USER)
+│   │   (Hanya file di folder ini yang punya URL: evenku.com/...)
+│   │
+│   ├── index.php       -> Landing Page.
+│   ├── login.php       -> Halaman Login.
+│   ├── dashboard.php   -> Dashboard User.
+│   │
+│   ├── 📁 admin/       (PANEL ADMIN)
+│   │   ├── dashboard.php   -> Statistik Admin.
+│   │   └── events.php      -> Form Kelola Event.
+│   │
+│   ├── 📁 assets/      (DANDANAN WEBSITE)
+│   │   ├── 📁 css/     (Style)
+│   │   └── 📁 js/      (Interaktif)
+│   │
+│   └── 📁 uploads/     (STORAGE)
+│       ├── 📁 avatars/  -> Foto user.
+│       └── 📁 payments/ -> Bukti bayar.
 │
-└── 📁 public/          (AREA PUBLIK - BAGIAN YANG DILIHAT USER)
-    │   (Hanya file di folder ini yang punya URL: evenku.com/...)
-    │
-    ├── index.php       -> Halaman Landing Page (Depan).
-    ├── login.php       -> Halaman Login.
-    ├── dashboard.php   -> Halaman Utama User setelah login.
-    ├── profile.php     -> Halaman Edit Profil.
-    ├── payment.php     -> Halaman Upload Bukti Bayar.
-    │
-    ├── 📁 admin/       (AREA ADMIN - DILINDUNGI PASSWORD)
-    │   ├── dashboard.php       -> Pusat kontrol admin.
-    │   ├── events.php          -> Form tambah event baru.
-    │   ├── event-participants.php -> Cek siapa saja yang daftar.
-    │   └── users.php           -> Kelola user manual.
-    │
-    ├── 📁 assets/      (DANDANAN WEBSITE)
-    │   ├── 📁 css/     
-    │   │   ├── layout.css      -> Mengatur sidebar, header, layout utama.
-    │   │   ├── responsive.css  -> Mengatur tampilan di HP (Mobile).
-    │   │   └── admin-modern.css -> Tema khusus halaman admin.
-    │   └── 📁 js/      (Script interaktif)
-    │
-    └── 📁 uploads/     (GUDANG FILE USER)
-        ├── 📁 avatars/  -> Foto profil user disimpan di sini.
-        └── 📁 payments/ -> Bukti transfer user disimpan di sini.
+├── 📁 database/        (SQL)
+│   └── schema.sql      -> Script pembuatan tabel database.
+│
+└── 📁 scripts/          (UTILITY)
+    └── ...             -> Script bantuan (misal: setup wizard).
 ```
 
 ---
@@ -101,3 +101,7 @@ require_once __DIR__ . '/../modules/events/EventService.php';
     Ubah database-nya dulu, lalu update class Model di `modules/`.
 
 Struktur ini membuat kode Anda **bersih**, **terorganisir**, dan **profesional**.
+
+---
+**Dokumentasi Selanjutnya**:
+[-> Lihat Arsitektur OOP](03_OOP_ARCHITECTURE.md)

@@ -1,9 +1,12 @@
 # 🏗️ Dokumen 3: Arsitektur OOP (Object-Oriented Programming)
 ## Membedah Mesin di Balik EventKu
 
-Project ini bukan sekadar kumpulan skrip PHP biasa. Project ini dibangun dengan arsitektur **Service-Oriented** berbasis Class. Ini adalah standar yang dipakai di dunia kerja profesional (mirip konsep Laravel/Symfony tapi versi Native).
+> **Navigasi Dokumentasi**:
+> [🏠 Home](../README.md) | [⚙️ Setup & Install](00_SETUP_AND_INSTALLATION.md) | [📘 Overview](01_PROJECT_OVERVIEW.md) | [📂 Struktur Folder](02_FOLDER_STRUCTURE.md) | [🗄️ Database](06_DATABASE_SCHEMA.md)
 
 ---
+
+Project ini bukan sekadar kumpulan skrip PHP biasa. Project ini dibangun dengan arsitektur **Service-Oriented** berbasis Class. Ini adalah standar yang dipakai di dunia kerja profesional (mirip konsep Laravel/Symfony tapi versi Native).
 
 ### 1. Konsep Dasar OOP di Sini
 Bayangkan kode Anda seperti sebuah **Restoran**:
@@ -124,7 +127,26 @@ if ($hasil['success']) {
 
 ---
 
-### 4. Keuntungan Menggunakan Cara Ini
+### 4. 💡 Panduan Menambah Fitur Baru
+
+Ingin menambahkan fitur? Misal: **"Komentar pada Event"**. Jangan asal tulis kode! Ikuti pola ini:
+
+1.  **Siapkan Database**:
+    *   Buat tabel `comments` di database (id, user_id, event_id, isi_komentar).
+2.  **Buat Service (Koki)**:
+    *   Buat file baru `modules/events/CommentService.php`.
+    *   Tulis function `addComment($userId, $eventId, $text)` di situ.
+    *   Tulis function `getCommentsByEvent($eventId)` di situ.
+3.  **Buat View (Pelayan)**:
+    *   Buka `public/event-detail.php`.
+    *   Panggil `CommentService`.
+    *   Tampilkan form komentar dan list komentar.
+
+Dengan cara ini, kode Anda tetap rapi meskipun fitur bertambah banyak.
+
+---
+
+### 5. Keuntungan Menggunakan Cara Ini
 
 1.  **Mudah Diperbaiki (Debug)**:
     *   Kalau tampilan berantakan -> Cari di file `public/`.
@@ -135,6 +157,9 @@ if ($hasil['success']) {
 3.  **Kerja Tim**:
     *   Satu orang bisa fokus desain tampilan (Frontend) di folder `public`.
     *   Satu orang fokus logika database (Backend) di folder `modules`.
-    *   Mereka bisa kerja bareng tanpa saling timpa kode.
 
 Dokumen ini menjelaskan **"JIWA"** dari source code EventKu. Dengan memahaminya, Anda bukan hanya "bisa coding", tapi "mengerti software engineering".
+
+---
+**Dokumentasi Selanjutnya**:
+[-> Lihat Spesifikasi Teknis](04_TECHNICAL_SPECIFICATION_REPORT.md)
