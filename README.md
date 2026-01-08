@@ -28,7 +28,7 @@ Kami percaya dokumentasi yang baik adalah kunci dari software yang hebat. Silaka
 | 📂 | **[Struktur Folder](DOCUMENTATION/02_FOLDER_STRUCTURE.md)** | Penjelasan arsitektur file `public` vs `modules` (Security). |
 | 🏗️ | **[Arsitektur OOP](DOCUMENTATION/03_OOP_ARCHITECTURE.md)** | Bedah kode, Design Pattern, dan cara menambah fitur baru. |
 | 🗄️ | **[Database Schema](DOCUMENTATION/06_DATABASE_SCHEMA.md)** | Kamus data lengkap, relasi tabel (ERD), dan query penting. |
-| 📄 | **[Laporan Teknis](DOCUMENTATION/04_TECHNICAL_SPECIFICATION_REPORT.md)** | Spesifikasi detail untuk kebutuhan Tugas Akhir/Skripsi. |
+| 📄 | **[Laporan Teknis](DOCUMENTATION/04_TECHNICAL_SPECIFICATION_REPORT.md)** | Spesifikasi detail untuk kebutuhan Tugas. |
 
 ---
 
