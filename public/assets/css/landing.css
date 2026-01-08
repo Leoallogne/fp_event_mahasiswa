@@ -514,8 +514,9 @@ body {
 .site-footer {
     background: white;
     border-top: 1px solid var(--border-color);
-    padding: 5rem 0 2rem;
+    padding: 3rem 0;
     margin-top: 5rem;
+    text-align: center;
 }
 
 .footer-brand {
@@ -524,5 +525,92 @@ body {
     color: var(--text-primary);
     text-decoration: none;
     display: inline-block;
-    margin-bottom: 1rem;
 }
+/* ================= SECTION: ABOUT US ================= */
+.about-section {
+    padding: 6rem 0;
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-image {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.about-image:hover img {
+    transform: scale(1.05);
+}
+
+.about-pattern {
+    position: absolute;
+    bottom: -20px;
+    right: -20px;
+    width: 200px;
+    height: 200px;
+    background-image: radial-gradient(#4f46e5 2px, transparent 2px);
+    background-size: 20px 20px;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+/* ================= SECTION: STATS / IMPACT ================= */
+.stats-section {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+    text-align: center;
+}
+
+.stat-item {
+    position: relative;
+    z-index: 1;
+}
+
+.stat-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+.stat-label {
+    color: #94a3b8;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Decoration for Stats */
+.stats-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(79, 70, 229, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+

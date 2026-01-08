@@ -1,106 +1,103 @@
-# 📂 Dokumen 2: Struktur Folder & File
-## Panduan Navigasi Kode EventKu
+# 📂 Dokumen 2: Struktur File & Folder (Deep Dive)
+## Peta Navigasi untuk Developer
 
-Sistem ini menggunakan **Public Folder Strategy**, standar keamanan modern di mana hanya folder `public/` yang boleh diakses oleh browser (web server root).
+Project ini tidak menggunakan struktur PHP biasa (seperti semua file ditumpuk di satu folder). Kita menggunakan **"Public Folder Strategy"**.
 
-### 🔽 Struktur Directory Tree
+### 🤔 Kenapa Struktur Ini?
+Banyak website PHP pemula di-hack karena file konfigurasi (seperti `.env` atau `database.php`) bisa dibuka langsung di browser (misal: `website.com/config/database.php`).
 
-```
-mahasiswa_fp/  (Root Project - Tidak boleh diakses public)
-├── .env                # File Konfigurasi Rahasia (Database, API Keys)
-├── composer.json       # Dependency Manager PHP
-├── vendor/             # Library pihak ketiga (Google API Client, Dotenv)
+Di EventKu, hal itu **TIDAK BISA DILAKUKAN**.
+Web Server (Apache/Nginx) hanya diarahkan ke folder `public/`. Semua file di luar folder itu **gaib** bagi browser, tapi bisa dibaca oleh PHP.
+
+---
+
+### 🌳 Pohon Direktori (Directory Tree)
+
+Berikut penjelasan detail setiap folder dan file penting di dalamnya:
+
+```plaintext
+mahasiswa_fp/  (ROOT PROJECT - AREA TERLARANG BAGI BROWSER)
 │
-├── api/                # Endpoint API khusus (Untuk AJAX / External)
-│   └── ApiClientCalendar.php  # Class wrapper Google Calendar API
+├── .env                [PENTING] File rahasia! Simpan password DB & API Key disini.
+├── composer.json       Daftar pustaka tambahan (library) yang dipakai project.
 │
-├── config/             # Konfigurasi Global Database & Session
-│   ├── database.php    # Class 'Database' (PDO Connection)
-│   └── session.php     # Helper untuk start session aman
+├── 📁 config/          (PENGATURAN DASAR)
+│   ├── database.php    Jantung koneksi database. File ini baca password dari .env.
+│   └── session.php     Mengatur agar login user tidak gampang dicuri (session hijacking).
 │
-├── modules/            # 🧠 CORE LOGIC (Service Layer)
-│   ├── analytics/      # Logika Statistik & Laporan Admin
-│   │   └── AnalyticsService.php
-│   ├── events/         # Logika Manajemen Event
-│   │   ├── EventService.php     # CRUD Event
-│   │   └── CategoryService.php  # CRUD Kategori
-│   ├── registrations/  # Logika Pendaftaran & Pembayaran
-│   │   └── RegistrationService.php
-│   ├── users/          # Logika User & Auth
-│   │   ├── Auth.php        # Login, Register, Middleware Role
-│   │   └── GoogleAuth.php  # Handle Login Google
-│   └── notifications/  # Logika Notifikasi
-│       └── NotificationService.php
+├── 📁 modules/         (OTAK APLIKASI - LOGIC DISINI)
+│   ├── 📁 users/       
+│   │   ├── Auth.php        -> Mengurus Login, Logout, Cek Password.
+│   │   └── GoogleAuth.php  -> Mengurus komunikasi ribet dengan Google.
+│   │
+│   ├── 📁 events/
+│   │   ├── EventService.php    -> Mengurus Tambah/Edit/Hapus Event.
+│   │   └── CategoryService.php -> Mengurus Kategori Event.
+│   │
+│   ├── 📁 registrations/
+│   │   └── RegistrationService.php -> Mengurus Pendaftaran (Cek kuota, simpan data).
+│   │
+│   └── 📁 analytics/
+│       └── AnalyticsService.php    -> Mengurus perhitungan statistik admin.
 │
-└── public/             # 🌍 WEB ROOT (Satu-satunya yang diakses Browser)
-    ├── .htaccess       # Aturan routing Apache
-    ├── index.php       # Landing Page (Homepage)
-    ├── login.php       # Halaman Login
-    ├── register.php    # Halaman Register
-    ├── dashboard.php   # Dashboard User
-    ├── admin/          # Area Khusus Admin
-    │   ├── index.php        # Redirect ke dashboard
-    │   ├── dashboard.php    # Dashboard Admin & Chart
-    │   ├── events.php       # Form Manajamen Event
-    │   └── ... (file admin lainnya)
-    ├── assets/         # File Statis (CSS, JS, Images)
-    │   ├── css/        # Stylesheets (layout.css, admin-modern.css)
-    │   ├── js/         # Javascript Logic
-    │   └── images/     # Gambar statis
-    └── uploads/        # File yang diupload User
-        ├── avatars/    # Foto profil user
-        └── payments/   # Bukti pembayaran transfer
+├── 📁 api/             (JEMBATAN EKSTERNAL)
+│   └── ApiClientCalendar.php -> Helper khusus untuk kirim data ke Google Calendar.
+│
+└── 📁 public/          (AREA PUBLIK - BAGIAN YANG DILIHAT USER)
+    │   (Hanya file di folder ini yang punya URL: evenku.com/...)
+    │
+    ├── index.php       -> Halaman Landing Page (Depan).
+    ├── login.php       -> Halaman Login.
+    ├── dashboard.php   -> Halaman Utama User setelah login.
+    ├── profile.php     -> Halaman Edit Profil.
+    ├── payment.php     -> Halaman Upload Bukti Bayar.
+    │
+    ├── 📁 admin/       (AREA ADMIN - DILINDUNGI PASSWORD)
+    │   ├── dashboard.php       -> Pusat kontrol admin.
+    │   ├── events.php          -> Form tambah event baru.
+    │   ├── event-participants.php -> Cek siapa saja yang daftar.
+    │   └── users.php           -> Kelola user manual.
+    │
+    ├── 📁 assets/      (DANDANAN WEBSITE)
+    │   ├── 📁 css/     
+    │   │   ├── layout.css      -> Mengatur sidebar, header, layout utama.
+    │   │   ├── responsive.css  -> Mengatur tampilan di HP (Mobile).
+    │   │   └── admin-modern.css -> Tema khusus halaman admin.
+    │   └── 📁 js/      (Script interaktif)
+    │
+    └── 📁 uploads/     (GUDANG FILE USER)
+        ├── 📁 avatars/  -> Foto profil user disimpan di sini.
+        └── 📁 payments/ -> Bukti transfer user disimpan di sini.
 ```
 
 ---
 
-### 🔍 Penjelasan Fungsi Folder Utama
+### 🚦 Alur Pemanggilan File (How it works)
 
-#### 1. `public/` (The Front Door)
-Ini adalah "wajah" aplikasi. Semua request dari browser masuk ke sini.
-*   **Kenapa dipisah?** Agar hacker tidak bisa mengakses file sensitif seperti `.env` atau kode logika di `modules/`.
-*   File di sini hanya berisi **View Logic** (HTML/Tampilan) dan pemanggilan ke `modules` (Backend Logic).
-*   Contoh alur file `public/login.php`:
-    1.  Include `config/database.php`.
-    2.  Panggil class `Auth` dari `modules/users/Auth.php`.
-    3.  Tampilkan Form HTML.
-    4.  Jika tombol submit ditekan, panggil `Auth->login()`.
+Bagaimana cara file di `public` (luar) bisa memanggil file di `modules` (dalam)?
 
-#### 2. `modules/` (The Brain)
-Di sinilah semua "otak" aplikasi berada. Menggunakan pola **Service-Oriented**.
-Setiap folder mewakili satu fitur besar:
-*   **Auth.php**: Menangani siapa yang boleh masuk, cek password, cek session login.
-*   **EventService.php**: Menangani simpan event ke database, ambil daftar event, hitung sisa kuota.
-*   **RegistrationService.php**: Menangani logika rumit pendaftaran (Cek kuota -> Simpan -> Kurangi kuota -> Kirim notifikasi).
+Mari kita lihat baris pertama di setiap file PHP di `public`:
 
-#### 3. `config/` (The Configuration)
-*   **database.php**: Class tunggal yang bertugas membuka pintu koneksi ke MySQL. Menggunakan **PDO** (PHP Data Objects) yang lebih aman dan support Environment Variables (`.env`).
-*   **session.php**: Memastikan session PHP dimulai dengan aman di setiap halaman.
+```php
+// Contoh di public/dashboard.php
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../modules/events/EventService.php';
+```
 
-#### 4. `api/` (The Bridge)
-Folder ini berisi helper untuk komunikasi dengan layanan luar.
-*   **ApiClientCalendar.php**: Class khusus yang membungkus kerumitan Google API. Punya fungsi `pushEvent()`, `deleteEvent()`, dll.
+*   `__DIR__`: Artinya "Folder tempat file ini berada" (yaitu `public`).
+*   `/../`: Artinya "Mundur satu langkah ke folder induk" (keluar dari `public`, masuk ke `mahasiswa_fp`).
+*   `/modules/...`: Masuk ke folder modules.
 
-#### 5. `.env` (The Secrets)
-File teks biasa yang **SANGAT RAHASIA**. Berisi password database, Client ID Google, dan setting SMTP email. File ini **TIDAK BOLEH** ada di folder public.
+**Analogi:**
+*   Folder `public` adalah **Ruang Tamu**. Tamu (User) hanya boleh di sini.
+*   Folder `modules` adalah **Dapur**. Tamu tidak boleh masuk dapur, tapi Pelayan (Script PHP) bisa bolak-balik dari Ruang Tamu ke Dapur untuk mengambilkan Makanan (Data) untuk Tamu.
 
----
+### 📝 Tips untuk Developer
+1.  **Mau ganti warna website?**
+    Edit file di `public/assets/css/`. Jangan ubah file PHP-nya.
+2.  **Mau ubah logika pendaftaran?**
+    Jangan cari di `public/register-event.php`. Buka `modules/registrations/RegistrationService.php`.
+3.  **Mau tambah kolom di tabel database?**
+    Ubah database-nya dulu, lalu update class Model di `modules/`.
 
-### ⚙️ Alur Kerja File (Request Lifecycle)
-Contoh saat User membuka `https://evenku.com/register-event.php?id=1`:
-
-1.  **Browser** meminta `public/register-event.php`.
-2.  **register-event.php** memuat dependensi:
-    ```php
-    require_once '../config/database.php';
-    require_once '../modules/events/EventService.php';
-    ```
-3.  Script membuat objek Service:
-    ```php
-    $eventService = new EventService();
-    $event = $eventService->getEventById(1); // Ambil data dari DB
-    ```
-4.  **Tampilan (HTML)** dirender menggunakan data `$event` tadi.
-5.  Browser menerima HTML utuh dan menampilkannya ke User.
-
-Struktur ini membuat kode **Rapi**, **Mudah Di-maintenance**, dan **Aman**.
+Struktur ini membuat kode Anda **bersih**, **terorganisir**, dan **profesional**.

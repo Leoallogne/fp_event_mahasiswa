@@ -26,7 +26,7 @@ $userEmail = !empty($currentUser['email']) ? htmlspecialchars($currentUser['emai
 <!-- Sidebar Navigation -->
 <nav class="sidebar">
     <!-- Sidebar Header -->
-    <div class="sidebar-header">
+    <div class="sidebar-header d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
             <!-- Brand Logo -->
             <a href="<?= $basePath ?>index.php" class="text-decoration-none d-flex align-items-center">
@@ -42,6 +42,10 @@ $userEmail = !empty($currentUser['email']) ? htmlspecialchars($currentUser['emai
                 </div>
             </a>
         </div>
+        <!-- Close Button (Mobile Only) -->
+        <button class="btn btn-link text-white-50 p-2 d-lg-none" id="sidebarClose" aria-label="Close sidebar">
+            <i class="bi bi-x-lg fs-4"></i>
+        </button>
     </div>
 
     <!-- Sidebar Menu -->
@@ -74,7 +78,8 @@ $userEmail = !empty($currentUser['email']) ? htmlspecialchars($currentUser['emai
                     </a>
                 </li>
 
-                <div class="nav-label mt-4 mb-2 px-3 text-uppercase small fw-bold" style="font-size: 0.7rem; color: #64748b;">
+                <div class="nav-label mt-4 mb-2 px-3 text-uppercase small fw-bold"
+                    style="font-size: 0.7rem; color: #64748b;">
                     System</div>
 
                 <li class="nav-item">
@@ -108,7 +113,8 @@ $userEmail = !empty($currentUser['email']) ? htmlspecialchars($currentUser['emai
                 </li>
             <?php else: ?>
                 <!-- User Menu -->
-                <div class="nav-label mt-2 mb-2 px-3 text-uppercase small fw-bold" style="font-size: 0.7rem; color: #64748b;">
+                <div class="nav-label mt-2 mb-2 px-3 text-uppercase small fw-bold"
+                    style="font-size: 0.7rem; color: #64748b;">
                     Menu</div>
 
                 <li class="nav-item">
@@ -163,15 +169,15 @@ $userEmail = !empty($currentUser['email']) ? htmlspecialchars($currentUser['emai
     <!-- Sidebar Footer -->
     <div class="sidebar-footer">
         <?php if ($isLoggedIn): ?>
-            <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between" style="background-color: rgba(255, 255, 255, 0.08);">
-                <div class="d-flex align-items-center" style="min-width: 0;">
-                    <div class="avatar me-2 flex-shrink-0">
+            <div class="d-flex align-items-center justify-content-between px-2">
+                <div class="d-flex align-items-center overflow-hidden">
+                    <div class="avatar me-2 flex-shrink-0" style="width: 32px; height: 32px;">
                         <?php if (!empty($currentUser['avatar']) && file_exists(__DIR__ . '/../uploads/avatars/' . $currentUser['avatar'])): ?>
                             <img src="<?= $basePath ?>uploads/avatars/<?= htmlspecialchars($currentUser['avatar']) ?>"
-                                class="rounded-circle border" width="36" height="36" alt="<?= $userName ?>">
+                                class="rounded-circle border" width="32" height="32" alt="<?= $userName ?>">
                         <?php else: ?>
                             <div class="avatar-initial rounded-circle bg-white border d-flex align-items-center justify-content-center text-primary fw-bold"
-                                style="width: 36px; height: 36px; font-size: 0.9rem;">
+                                style="width: 32px; height: 32px; font-size: 0.8rem;">
                                 <?= $userInitial ?>
                             </div>
                         <?php endif; ?>
@@ -179,13 +185,11 @@ $userEmail = !empty($currentUser['email']) ? htmlspecialchars($currentUser['emai
                     <div class="user-details overflow-hidden">
                         <div class="user-name fw-bold text-white text-truncate" style="font-size: 0.85rem;"
                             title="<?= $userName ?>"><?= $userName ?></div>
-                        <div class="user-email text-light opacity-75 text-truncate" style="font-size: 0.75rem;"
-                            title="<?= $userEmail ?>"><?= $userEmail ?></div>
                     </div>
                 </div>
-                <a href="<?= $basePath ?>logout.php" class="btn btn-sm btn-white text-danger border shadow-sm ms-2"
+                <a href="<?= $basePath ?>logout.php" class="text-danger opacity-75 hover-opacity-100 p-1"
                     data-bs-toggle="tooltip" title="Keluar">
-                    <i class="bi bi-box-arrow-right"></i>
+                    <i class="bi bi-box-arrow-right fs-6"></i>
                 </a>
             </div>
         <?php else: ?>
@@ -215,6 +219,10 @@ $userEmail = !empty($currentUser['email']) ? htmlspecialchars($currentUser['emai
 
         if (mobileToggle) mobileToggle.addEventListener('click', toggleSidebar);
         if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        // Close button logic
+        const sidebarClose = document.getElementById('sidebarClose');
+        if (sidebarClose) sidebarClose.addEventListener('click', toggleSidebar);
 
         // Auto initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))

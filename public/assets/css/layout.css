@@ -81,6 +81,8 @@ body {
     transform: scale(0.95);
 }
 
+
+
 /* Sidebar Overlay */
 .sidebar-overlay {
     display: none;
@@ -334,4 +336,12 @@ body {
         width: 85% !important;
         max-width: 320px;
     }
+}
+
+/* FIX: Hide toggle when sidebar open (Global override for ALL screen sizes) */
+body.sidebar-open .mobile-toggle {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }

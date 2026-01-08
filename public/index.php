@@ -193,6 +193,74 @@ $stats = $analyticsService->getEventStats();
                 </div>
             </div>
 
+            <!-- ================= ABOUT US ================= -->
+            <div class="about-section" id="about">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6" data-aos="fade-right">
+                        <div class="about-image">
+                            <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                                alt="Tentang EventKu">
+                        </div>
+                        <div class="about-pattern"></div>
+                    </div>
+                    <div class="col-lg-6" data-aos="fade-left">
+                        <span class="text-primary fw-bold text-uppercase tracking-wider small">Tentang Kami</span>
+                        <h2 class="display-5 fw-bold mb-4 mt-2">Membangun Ekosistem Kampus yang Lebih Hidup</h2>
+                        <p class="lead text-secondary mb-4">
+                            EventKu bukan sekadar papan pengumuman digital. Kami adalah jembatan yang menghubungkan ide
+                            brilian mahasiswa dengan panggung eksekusi.
+                        </p>
+                        <p class="text-secondary mb-4">
+                            Berdiri dengan visi untuk mendigitalisasi kegiatan kemahasiswaan, kami membantu organisasi
+                            kampus mengelola event lebih efisien, sekaligus memudahkan mahasiswa mencari wadah pengembangan
+                            diri yang tepat.
+                        </p>
+                        <div class="d-flex gap-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill text-primary"></i>
+                                <span class="fw-semibold">Terintegrasi</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill text-primary"></i>
+                                <span class="fw-semibold">Paperless</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill text-primary"></i>
+                                <span class="fw-semibold">Real-time</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= STATS SECTION ================= -->
+            <div class="stats-section mt-5 rounded-4 shadow-lg" data-aos="fade-up">
+                <div class="container">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold mb-2">Dampak Nyata Kami</h2>
+                        <p class="text-white opacity-75">Angka yang berbicara tentang pertumbuhan komunitas ini</p>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">Event Terselenggara</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">2.5k</div>
+                            <div class="stat-label">Mahasiswa Aktif</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">10+</div>
+                            <div class="stat-label">Kampus Mitra</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Paperless</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         <?php else: ?>
             <!-- ================= LOGGED IN DASHBOARD HEADER ================= -->
             <div class="dashboard-header mb-5">
@@ -337,37 +405,19 @@ $stats = $analyticsService->getEventStats();
     </div> <!-- End Container -->
 
     <!-- Footer -->
+    <!-- Footer -->
     <footer class="site-footer">
-        <div class="container">
-            <div class="row gy-4">
-                <div class="col-lg-4">
-                    <a href="index.php" class="footer-brand">EventKu.</a>
-                    <p class="text-secondary">Platform manajemen event mahasiswa terpercaya. Temukan, ikuti, dan
-                        kembangkan potensimu.</p>
-                </div>
-                <div class="col-lg-2 col-6">
-                    <h6 class="fw-bold mb-3 text-dark">Platform</h6>
-                    <ul class="list-unstyled d-flex flex-column gap-2">
-                        <li><a href="#" class="text-secondary text-decoration-none">Tentang Kami</a></li>
-                        <li><a href="#" class="text-secondary text-decoration-none">Karir</a></li>
-                        <li><a href="#" class="text-secondary text-decoration-none">Blog</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2 col-6">
-                    <h6 class="fw-bold mb-3 text-dark">Bantuan</h6>
-                    <ul class="list-unstyled d-flex flex-column gap-2">
-                        <li><a href="#" class="text-secondary text-decoration-none">Pusat Bantuan</a></li>
-                        <li><a href="#" class="text-secondary text-decoration-none">Syarat & Ketentuan</a></li>
-                        <li><a href="#" class="text-secondary text-decoration-none">Kebijakan Privasi</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4">
-                    <h6 class="fw-bold mb-3 text-dark">Hubungi Kami</h6>
-                    <p class="text-secondary mb-2"><i class="bi bi-envelope me-2"></i> info@eventku.id</p>
-                    <p class="text-secondary"><i class="bi bi-whatsapp me-2"></i> +62 812 3456 7890</p>
-                </div>
+        <div class="container text-center">
+            <a href="index.php" class="footer-brand d-block mb-3">EventKu.</a>
+            <p class="text-secondary mb-4 opacity-75">
+                Platform manajemen event mahasiswa terpercaya. Temukan, ikuti, dan kembangkan potensimu.
+            </p>
+            <div class="d-flex justify-content-center gap-4 mb-4">
+                <a href="#" class="text-secondary text-decoration-none small">Tentang Kami</a>
+                <a href="#" class="text-secondary text-decoration-none small">Bantuan</a>
+                <a href="#" class="text-secondary text-decoration-none small">Privasi</a>
             </div>
-            <div class="border-top mt-5 pt-4 text-center text-muted small">
+            <div class="border-top pt-4 text-muted small">
                 &copy; <?= date('Y') ?> EventKu. All rights reserved.
             </div>
         </div>

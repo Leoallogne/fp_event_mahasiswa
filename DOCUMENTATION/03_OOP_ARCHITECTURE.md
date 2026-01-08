@@ -1,89 +1,140 @@
-# 🏗️ Dokumen 3: OOP Architecture & Code Design
-## Detail Teknis Pemrograman Berorientasi Objek (OOP)
+# 🏗️ Dokumen 3: Arsitektur OOP (Object-Oriented Programming)
+## Membedah Mesin di Balik EventKu
 
-Sistem EventKu dibangun menggunakan konsep OOP yang solid untuk memastikan kode reusable (bisa dipakai ulang) dan scalable (mudah dikembangkan). Tidak ada kode "spaghetti" (campur aduk) di sini; semua logika dibungkus dalam Class.
-
-### 1. Pola Desain (Design Principles)
-*   **Service Layer Pattern**: Logika bisnis tidak ditulis langsung di file tampilan (`public/*.php`), melainkan dipisah ke dalam Class "Service" di folder `modules/`.
-    *   *Contoh*: Logika "Daftar Event" ada di `RegistrationService`, bukan di `register-event.php`.
-*   **Dependency Injection (Connectors)**: Class Service menerima dependensi (seperti koneksi Database) melalui constructor atau membuatnya saat inisialisasi.
-*   **Encapsulation**: Properti sensitif dilindungi (private), hanya bisa diakses lewat method public.
-*   **Single Responsibility**: Satu class hanya mengurus satu hal. `Auth` hanya mengurus login, tidak mengurus event.
+Project ini bukan sekadar kumpulan skrip PHP biasa. Project ini dibangun dengan arsitektur **Service-Oriented** berbasis Class. Ini adalah standar yang dipakai di dunia kerja profesional (mirip konsep Laravel/Symfony tapi versi Native).
 
 ---
 
-### 2. Class Reference (Kamus Class)
+### 1. Konsep Dasar OOP di Sini
+Bayangkan kode Anda seperti sebuah **Restoran**:
 
-Berikut adalah daftar Class utama dan method (fungsi) penting di dalamnya:
-
-#### A. Core Classes (`config/`)
-
-**1. Class `Database`**
-Pondasi utama aplikasi. Bertugas mengelola koneksi ke MySQL.
-*   `__construct()`: Membaca file `.env` dan menyiapkan parameter koneksi.
-*   `getConnection()`: **Fungsi Paling Penting!** Mengembalikan objek `PDO` yang aktif. Semua Service lain memanggil ini.
-
-#### B. Service Classes (`modules/`)
-
-**2. Class `Auth` (`modules/users/Auth.php`)**
-Penjaga pintu gerbang keamanan.
-*   `requireUser()` / `requireAdmin()`: **Middleware**. Mengecek apakah user sudah login dan punya hak akses. Jika tidak, tendang ke login page.
-*   `register()`: Hash password user baru dan simpan ke DB.
-*   `login($email, $password)`: Verifikasi password user.
-*   `getCurrentUser()`: Mengambil data user yang sedang login dari Session.
-
-**3. Class `EventService` (`modules/events/EventService.php`)**
-Manajer data event.
-*   `createEvent($data)`: Validasi input admin dan INSERT event baru.
-*   `getAllEvents()`: Mengambil list event (bisa difilter).
-*   `getEventById($id)`: Mengambil detail satu event lengkap.
-*   `updateCalendarEventId()`: Menyambungkan ID event lokal dengan ID event di Google Calendar.
-*   `getEventStats()`: (Admin) Menghitung total pendaftar untuk Dashboard.
-
-**4. Class `RegistrationService` (`modules/registrations/RegistrationService.php`)**
-Mesin transaksi pendaftaran. Logikanya paling kompleks.
-*   `registerForEvent($userId, $eventId)`:
-    1.  Cek apakah user sudah daftar?
-    2.  Cek apakah kuota masih ada? (**Atomicity/Locking** penting di sini agar tidak oversold).
-    3.  Kurangi kuota event.
-    4.  Simpan data pendaftaran.
-*   `verifyPayment($userId, $eventId, $status)`: (Admin) Mengubah status dari 'pending' ke 'confirmed' atau 'rejected'.
-*   `getHistoryByUser($userId)`: Mengambil riwayat event user untuk halaman "Tiket Saya".
-
-**5. Class `AnalyticsService` (`modules/analytics/AnalyticsService.php`)**
-Data Scientist-nya admin.
-*   `getMonthlyStats()`: Mengolah data timestamp pendaftaran menjadi grafik per bulan.
-*   `getCategoryDistribution()`: Menghitung persentase popularitas kategori.
-*   `getExportData()`: Menyiapkan raw data untuk dijadikan file CSV/Excel.
-
-**6. Class `ApiClientCalendar` (`api/ApiClientCalendar.php`)**
-Penerjemah bahasa Google.
-*   `pushEvent($data)`: Mengirim data event kita ke server Google.
-*   `deleteEvent($calendarId)`: Menghapus event di Google jika di admin dihapus.
+1.  **View (`public/*.php`) = Pelayan**.
+    *   Tugasnya hanya menyapa tamu, menerima pesanan, dan mengantar makanan ke meja.
+    *   Dia TIDAK BOLEH memasak. (File View tidak boleh ada query SQL `SELECT * FROM...`).
+2.  **Service (`modules/*Service.php`) = Koki**.
+    *   Tugasnya memasak. Dia yang tahu resep, takaran bumbu, dan cara motong daging.
+    *   Dia menerima pesanan dari Pelayan, memprosesnya, dan memberikan hasilnya balik ke Pelayan.
+    *   Di sinilah query SQL (`INSERT`, `UPDATE`, `SELECT`) berada.
+3.  **Database Class (`config/database.php`) = Kompor/Gas**.
+    *   Alat vital yang dibutuhkan Koki untuk bekerja. Tanpa ini, tidak bisa masak.
 
 ---
 
-### 3. Contoh Alur Data (Data Flow)
+### 2. Diagram Kelas (Class Diagram)
 
-Mari kita bedah apa yang terjadi secara OOP saat Admin **Membuat Event Baru**:
+Berikut adalah visualisasi bagaimana Class-Class di sistem ini saling berhubungan:
 
-1.  **Input**: Admin mengisi form di `public/admin/events.php`.
-2.  **Instantiation**: File `events.php` membuat objek baru:
-    ```php
-    $eventService = new EventService();
-    $calendarApi = new ApiClientCalendar();
-    ```
-3.  **Process 1 (Database Lokal)**:
-    `$eventService->createEvent($data)` dipanggil.
-    -> Class ini membuka koneksi DB.
-    -> Melakukan Query `INSERT INTO events...`.
-    -> Mengembalikan ID event baru (misal: ID 50).
-4.  **Process 2 (Google API)**:
-    `$calendarApi->pushEvent($data)` dipanggil.
-    -> Mengirim Request HTTP ke Google API.
-    -> Google membalas dengan ID Kalender (misal: "abc123google").
-5.  **Process 3 (Sync)**:
-    `$eventService->updateCalendarEventId(50, "abc123google")` dipanggil.
-    -> Menyimpan ID Google tadi ke database lokal.
+```mermaid
+classDiagram
+    class Database {
+        -pdo connection
+        +__construct()
+        +getConnection()
+    }
 
-Dengan struktur OOP ini, jika suatu saat kita ingin mengganti Google Calendar dengan Outlook Calendar, kita hanya perlu mengubah kode di Process 2 tanpa merusak Process 1. Ini disebut **Loose Coupling** (Keterkaitan Longgar).
+    class Auth {
+        +login(email, password)
+        +register(data)
+        +requireUser()
+        +getCurrentUser()
+    }
+
+    class EventService {
+        +createEvent(data)
+        +getAllEvents()
+        +joinEvent(eventId, userId)
+    }
+
+    class RegistrationService {
+        +registerForEvent()
+        +cancelRegistration()
+        +verifyPayment()
+    }
+
+    class AnalyticsService {
+        +getMonthlyStats()
+        +getPopularCategories()
+    }
+
+    %% Hubungan (Dependency)
+    Auth ..> Database : uses
+    EventService ..> Database : uses
+    RegistrationService ..> Database : uses
+    AnalyticsService ..> Database : uses
+```
+
+Semua Service (Koki) bergantung pada `Database` (Kompor).
+
+---
+
+### 3. Bedah Alur 1 Fitur: "Pendaftaran Event"
+
+Mari kita lihat perjalanan data saat User mengklik tombol **"DAFTAR"**, langkah demi langkah secara OOP:
+
+#### Langkah 1: Pelayan Menerima Request (View)
+File: `public/register-event.php`
+
+```php
+// 1. Pelayan (View) memanggil Koki (Service)
+$registrationService = new RegistrationService();
+
+// 2. Pelayan menerima input User
+$userId = $_SESSION['user_id'];
+$eventId = $_POST['event_id'];
+
+// 3. Pelayan menyuruh Koki bekerja
+$hasil = $registrationService->registerForEvent($userId, $eventId);
+```
+
+#### Langkah 2: Koki Bekerja (Service Logic)
+File: `modules/registrations/RegistrationService.php`
+
+```php
+public function registerForEvent($userId, $eventId) {
+    // 1. Koki cek dulu: Emang stok (kuota) masih ada?
+    $kuota = $this->db->query("SELECT kuota FROM events WHERE id = $eventId");
+    
+    // 2. Koki cek: User ini udah pernah makan (daftar) belum?
+    $cek = $this->db->query("SELECT * FROM registrations WHERE...");
+
+    if ($kuota > 0 && !$cek) {
+        // 3. Masak! (Simpan data pendaftaran)
+        $this->db->query("INSERT INTO registrations...");
+        
+        // 4. Kurangi stok bahan (Update kuota)
+        $this->db->query("UPDATE events SET kuota = kuota - 1...");
+        
+        return ["success" => true]; // "Masakan Jadi!"
+    } else {
+        return ["success" => false]; // "Bahan habis, Bos!"
+    }
+}
+```
+
+#### Langkah 3: Pelayan Melapor ke User (View)
+Kembali ke `public/register-event.php`
+
+```php
+if ($hasil['success']) {
+    echo "Selamat! Pendaftaran Berhasil."; // Tampilkan pesan sukses
+} else {
+    echo "Maaf, Kuota Penuh."; // Tampilkan pesan error
+}
+```
+
+---
+
+### 4. Keuntungan Menggunakan Cara Ini
+
+1.  **Mudah Diperbaiki (Debug)**:
+    *   Kalau tampilan berantakan -> Cari di file `public/`.
+    *   Kalau saldo/kuota salah hitung -> Cari di file `modules/`.
+    *   Masalah jadi terisolasi, tidak pusing cari di ribuan baris kode.
+2.  **Aman (Security)**:
+    *   Hacker tidak bisa menyisipkan kode jahat di SQL (SQL Injection) karena semua Service menggunakan `Prepare Statement`.
+3.  **Kerja Tim**:
+    *   Satu orang bisa fokus desain tampilan (Frontend) di folder `public`.
+    *   Satu orang fokus logika database (Backend) di folder `modules`.
+    *   Mereka bisa kerja bareng tanpa saling timpa kode.
+
+Dokumen ini menjelaskan **"JIWA"** dari source code EventKu. Dengan memahaminya, Anda bukan hanya "bisa coding", tapi "mengerti software engineering".

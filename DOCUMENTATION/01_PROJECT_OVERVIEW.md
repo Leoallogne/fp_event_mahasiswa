@@ -1,89 +1,125 @@
-# 📘 Dokumen 1: Project Overview & Features
-## EventKu - Sistem Manajemen Event Mahasiswa
+# 📘 Dokumen 1: Project Overview (Gambaran Umum)
+## EventKu - Sistem Manajemen Event Mahasiswa Modern
 
-### 1. Deskripsi Project
-**EventKu** adalah platform berbasis web yang dirancang untuk memudahkan mahasiswa dalam mengelola, mencari, dan mendaftar event di lingkungan kampus maupun umum. Sistem ini memisahkan peran antara **Pengguna Biasa (Mahasiswa/Umum)** dan **Administrator**, dengan fokus pada kemudahan penggunaan, keamanan data, dan integrasi modern (Google Login, Maps, Calendar).
-
-### 2. Teknologi (Tech Stack)
-Project ini dibangun menggunakan teknologi **PHP Native** dengan pendekatan modern:
-*   **Backend Language**: PHP 8.0+
-*   **Database**: MySQL / MariaDB
-*   **Frontend**: HTML5, CSS3 (Custom + Bootstrap 5), JavaScript (Vanilla)
-*   **Architecture**: Service-Oriented Architecture (Logic dipisah dalam Service Classes)
-*   **External APIs**:
-    *   **Google OAuth 2.0**: Untuk login praktis menggunakan akun Google.
-    *   **Google Calendar API**: Sinkronisasi jadwal event otomatis ke kalender peserta.
-    *   **Leaflet JS / OpenStreetMap**: Peta interaktif untuk lokasi event.
-*   **Server Compatibility**: Apache (Support `.htaccess` untuk routing dan security).
+> **Versi Dokumen**: 2.0 (Enhanced)
+> **Status Project**: Production Ready
+> **Technology**: Native PHP (OOP) + MySQL
 
 ---
 
-### 3. Fitur Utama
+### 1. 🌟 Latar Belakang & Tujuan
+**EventKu** diciptakan untuk memecahkan masalah umum di kampus: **Penyebaran informasi event yang berantakan**. Mahasiswa sering ketinggalan info seminar atau lomba karena poster fisik hilang atau tertumpuk di grup chat.
 
-#### 🅰️ Fitur User (Mahasiswa/Umum)
-1.  **Authentication Modern**:
-    *   Login & Register via Email/Password (Encrypted).
-    *   **Login with Google** (One-click sign in).
-    *   Forgot Password & Reset flow.
-2.  **Dashboard User**:
-    *   Melihat statistik ringkas (Event diikuti, Status pendaftaran).
-    *   Kalender interaktif.
-3.  **Jelajah Event (Explore)**:
-    *   Pencarian event (Search bar).
-    *   Filter berdasarkan Kategori (Seminar, Workshop, Lomba, dll).
-    *   Filter berdasarkan Status (Open, Closed).
-4.  **Pendaftaran Event**:
-    *   Detail event lengkap (Peta lokasi, Deskripsi, Kuota).
-    *   **Sistem Tiket**:
-        *   **Event Gratis**: Langsung terdaftar.
-        *   **Event Berbayar**: Upload bukti pembayaran & menunggu verifikasi Admin.
-    *   Cek sisa kuota real-time.
-5.  **Manajemen Tiket Saya**:
-    *   Melihat riwayat event yang diikuti.
-    *   Cetak Tiket / Bukti Pendaftaran.
-    *   Sinkronisasi ulang ke Google Calendar.
-6.  **Profile Management**:
-    *   Ganti foto profil (Avatar).
-    *   Update biodata dan password.
-
-#### 🅱️ Fitur Administrator
-1.  **Dashboard Admin**:
-    *   **Analitik Grafis**: Grafik pendaftaran per bulan (Chart.js), Perbandingan kategori, Total user.
-    *   Statistik pendapatan (untuk event berbayar).
-2.  **Manajemen Event (CRUD)**:
-    *   Tambah/Edit/Hapus Event.
-    *   Integration Map Picker (Pilih lokasi di peta).
-    *   Atur Kuota dan Harga Tiket.
-3.  **Manajemen Peserta (Verifikasi)**:
-    *   Melihat daftar pendaftar per event.
-    *   **Verifikasi Pembayaran**: Button Terima (Approve) atau Tolak (Reject) untuk event berbayar.
-    *   Lihat bukti transfer (Image viewer).
-4.  **Laporan (Reporting)**:
-    *   **Export CSV**: Download data peserta event untuk keperluan absensi/sertifikat.
-5.  **Manajemen Kategori**:
-    *   Tambah/Hapus kategori event dinamis.
+**Tujuan Utama Sistem:**
+1.  **Sentralisasi**: Satu tempat untuk SEMUA info event kampus.
+2.  **Kemudahan Daftar**: Tidak perlu lagi isi Google Form manual berulang-ulang.
+3.  **Real-time Update**: Kuota, status bayar, dan jadwal tersinkronisasi otomatis.
+4.  **Paperless**: Tiket digital dan verifikasi online.
 
 ---
 
-### 4. Skema Database (Ringkasan)
-Sistem menggunakan database relasional yang kuat:
+### 2. 🎡 Alur Pengguna (User Flow)
 
-*   **`users`**: Menyimpan data akun (email, password hash, role, google_id, avatar).
-*   **`events_categories`**: Master data kategori event.
-*   **`events`**: Data utama event (judul, tanggal, lokasi, harga, kuota, lat/long).
-*   **`registrations`**: Tabel transaksi pendaftaran (menghubungkan user & event, status pembayaran, bukti bayar).
-*   **`notifications`**: Sistem notifikasi internal.
-*   **`calendar_cache`**: Caching data kalender untuk performa.
+Berikut adalah diagram bagaimana User berinteraksi dengan sistem EventKu:
+
+```mermaid
+graph TD
+    A[Mulai] --> B{Punya Akun?}
+    B -- Belum --> C[Register / Login Google]
+    B -- Sudah --> D[Login]
+    
+    D --> E[Dashboard User]
+    E --> F[Jelajah Event]
+    F --> G{Pilih Event}
+    
+    G --> H[Lihat Detail Event]
+    H --> I{Event Berbayar?}
+    
+    I -- Tidak (Gratis) --> J[Klik Daftar]
+    J --> K[Terdaftar Otomatis]
+    
+    I -- Ya (Berbayar) --> L[Klik Daftar]
+    L --> M[Upload Bukti Transfer]
+    M --> N[Status: Pending]
+    N --> O{Admin Verifikasi}
+    
+    O -- Terima --> P[Status: Confirmed]
+    O -- Tolak --> Q[Status: Rejected]
+    
+    K --> R[Tiket Muncul di 'Tiket Saya']
+    P --> R
+    R --> S[Sync ke Google Calendar]
+    
+    style A fill:#f9f,stroke:#333
+    style P fill:#9f9,stroke:#333
+    style K fill:#9f9,stroke:#333
+```
 
 ---
 
-### 5. Keunggulan Sistem
-1.  **Public Folder Strategy**: File inti (backend) diletakkan di luar folder public untuk keamanan maksimal. Akses langsung ke file config/modules ditutup.
-2.  **Responsive Design**: Tampilan optimal di Laptop, Tablet, maupun HP.
-3.  **Secure**:
-    *   Password hashing (Bcrypt).
-    *   SQL Injection Protection (PDO Prepared Statements).
-    *   XSS Protection (Output Escaping).
-    *   CSRF Protection (Basic session validation).
+### 3. 🛠️ Spesifikasi Teknis (Tech Stack Detail)
 
-Dokumen ini memberikan gambaran umum tentang apa yang bisa dilakukan oleh sistem **EventKu**.
+Project ini dibangun dengan standar industri terkini untuk memastikan performa dan keamanan.
+
+#### A. Backend (Sisi Server)
+*   **Bahasa**: PHP 8.0 atau lebih baru.
+    *   *Kenapa PHP Native?* Untuk performa maksimal tanpa overhead framework berat, sambil tetap menerapkan konsep OOP yang rapi.
+*   **Database**: MySQL / MariaDB (Relational Database).
+    *   Menggunakan engine InnoDB untuk support transaksi (penting saat rebutan kuota event).
+*   **Security Libraries**:
+    *   `bcrypt`: Standar hashing password (tidak bisa di-crack murni).
+    *   `PDO`: Koneksi database anti SQL Injection.
+
+#### B. Frontend (Sisi Tampilan)
+*   **Framework CSS**: Bootstrap 5.3 (Responsive Mobile-First).
+*   **Custom CSS**: Glassmorphism UI (Efek kaca transparan modern).
+*   **Icons**: Bootstrap Icons (Ringan & Vektor).
+*   **Maps**: Leaflet JS + OpenStreetMap (Gratis, tidak butuh kartu kredit seperti Google Maps).
+
+#### C. Integrasi Pihak Ketiga (API)
+*   **Google OAuth 2.0**: Memungkinkan user login pakai akun Gmail kampus/pribadi.
+*   **Google Calendar API**: Fitur _"Killer Feature"_ sistem ini. Saat user daftar event, event itu otomatis muncul di aplikasi Kalender HP mereka.
+
+---
+
+### 4. 🗄️ Struktur Database (ERD)
+
+Sistem ini didukung oleh 6 tabel utama yang saling berelasi:
+
+1.  **`users`**
+    *   DATA: Profile user (Nama, Email, Password, Peran/Role).
+    *   FUNGSI: Menyimpan siapa yang boleh login.
+2.  **`events`**
+    *   DATA: Judul, Deskripsi, Tanggal, Harga, Kuota, Lokasi (Lat/Long).
+    *   FUNGSI: Katalog semua kegiatan.
+3.  **`events_categories`**
+    *   DATA: Nama Kategori (Seminar, Workshop, Musik).
+    *   FUNGSI: Mengelompokkan event agar mudah dicari.
+4.  **`registrations`** (Tabel Transaksi)
+    *   DATA: ID User, ID Event, Tanggal Daftar, Bukti Bayar, Status (Pending/Confirmed).
+    *   FUNGSI: Mencatat "Siapa Mendaftar Apa".
+5.  **`notifications`**
+    *   DATA: Pesan, Tipe (Success/Alert), Status Baca.
+    *   FUNGSI: Memberi tahu user jika pembayaran diterima/ditolak.
+6.  **`calendar_cache`**
+    *   DATA: Token sinkronisasi.
+    *   FUNGSI: Mempercepat proses loading kalender tanpa harus request ke Google terus-menerus.
+
+---
+
+### 5. ✨ Fitur Unggulan (Key Highlights)
+
+*   **🔒 Security First**:
+    Folder inti sistem (`modules`, `config`) berada di luar folder `public`. Artinya, hacker **mustahil** mengakses file logika PHP secara langsung dari browser. Mereka hanya bisa melihat "pintu depan" (`index.php`, dll).
+    
+*   **📱 Mobile Friendly**:
+    Tampilan didesain agar nyaman dibuka di HP. Sidebar otomatis jadi menu burger saat di layar kecil.
+    
+*   **⚡ Atomicity (Anti Bentrok)**:
+    Sistem pendaftaran menggunakan "Database Transaction".
+    *   *Skenario*: Jika sisa kuota 1, dan ada 2 orang klik "Daftar" bersamaan di detik yang sama.
+    *   *Hasil*: Sistem akan mengunci database sejenak. Orang pertama berhasil, orang kedua otomatis gagal/penuh. Tidak akan pernah terjadi kuota minus (-1).
+
+---
+
+Simpan dokumen ini sebagai referensi utama untuk memahami **"Apa itu EventKu"**.
